@@ -29,9 +29,12 @@
         
         /* Left Sidebar Panel */
         .sidebar { background: #ffffff; border-right: 1px solid #e9edef; display: flex; flex-direction: column; }
-        .sidebar-header { background: #f0f2f5; padding: 16px; display: flex; justify-content: space-between; align-items: center; height: 60px; }
-        #user-display { font-weight: 600; color: #111b21; font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 180px; }
+        .sidebar-header { background: #f0f2f5; padding: 16px; display: flex; justify-content: space-between; align-items: center; height: 60px; gap: 8px; }
+        #user-display { font-weight: 600; color: #111b21; font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
+        
+        .header-buttons { display: flex; gap: 6px; align-items: center; }
         .logout-btn { background: #ea0038; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600; }
+        .admin-toggle-btn { background: #00a884; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600; display: none; }
         
         .search-area { padding: 12px; background: #fff; border-bottom: 1px solid #e9edef; display: flex; flex-direction: column; gap: 8px; }
         .search-area input { width: 100%; padding: 10px 14px; border: none; background: #f0f2f5; border-radius: 8px; font-size: 14px; outline: none; }
@@ -112,7 +115,10 @@
         <div class="sidebar">
             <div class="sidebar-header">
                 <span id="user-display">Connecting...</span>
-                <button id="logout-btn" class="logout-btn">Logout</button>
+                <div class="header-buttons">
+                    <button id="admin-toggle-btn" class="admin-toggle-btn">Admin 👑</button>
+                    <button id="logout-btn" class="logout-btn">Logout</button>
+                </div>
             </div>
             
             <div class="search-area">
@@ -184,8 +190,11 @@
         import { getFirestore, collection, addDoc, doc, setDoc, query, orderBy, onSnapshot, serverTimestamp, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
-        // MASTER CONFIGURATION IDENTIFICATION KEY
-        const ADMIN_GMAIL = "your_actual_email@gmail.com"; // 👈 CHANGE THIS VALUE RIGHT HERE!
+        // MASTER CONFIGURATION IDENTIFICATION ROSTER (AUTHORIZED SUPER ADMINS)
+        const ADMIN_GMAILS = [
+            "leo.noh.32012@aaia.ntpc.edu.tw",
+            "jaein8080@gmail.com"
+        ];
 
         const firebaseConfig = {
             apiKey: "AIzaSyBOMhYlrzoSgabnphKfZuT8YW52ZkeL9Os",
@@ -222,12 +231,25 @@
         const targetUserInput = document.getElementById("target-user-input");
         const sysAnnouncement = document.getElementById("sys-announcement");
         const footerInputDeck = document.getElementById("footer-input-deck");
+        const adminToggleBtn = document.getElementById("admin-toggle-btn");
 
         // Admin Buttons Connectors
         const killSwitchBtn = document.getElementById("kill-switch-btn");
         const announcementInput = document.getElementById("announcement-input");
         const modTargetInput = document.getElementById("mod-target-input");
         const adminUserRoster = document.getElementById("admin-user-roster");
+
+        // Helper function to check if an email is an authorized admin
+        function isAdmin(email) {
+            if (!email) return false;
+            return ADMIN_GMAILS.map(e => e.toLowerCase()).includes(email.toLowerCase());
+        }
+
+        // Toggle Admin Panel View
+        adminToggleBtn.addEventListener("click", () => {
+            chatContainer.classList.toggle("show-admin");
+            adminPanel.classList.toggle("hidden");
+        });
 
         // Trigger Google Login
         document.getElementById("google-login-btn").addEventListener("click", async () => {
@@ -270,11 +292,14 @@
                     }, { merge: true });
 
                     // 3. Evaluate Admin Access Level Clearance Engine Switch
-                    if (emailClean === ADMIN_GMAIL.toLowerCase()) {
-                        chatContainer.classList.add("show-admin");
-                        adminPanel.classList.remove("hidden");
+                    if (isAdmin(emailClean)) {
+                        adminToggleBtn.style.display = "inline-block";
+                        // Kept closed by default until toggle click events trigger
+                        chatContainer.classList.remove("show-admin");
+                        adminPanel.classList.add("hidden");
                         runAdminEngineTracker();
                     } else {
+                        adminToggleBtn.style.display = "none";
                         chatContainer.classList.remove("show-admin");
                         adminPanel.classList.add("hidden");
                     }
@@ -286,6 +311,7 @@
                 authContainer.classList.remove("hidden");
                 chatContainer.classList.add("hidden");
                 adminPanel.classList.add("hidden");
+                adminToggleBtn.style.display = "none";
                 if (unsubscribeChat) unsubscribeChat();
             }
         });
@@ -296,7 +322,7 @@
                 if (snapshot.exists()) {
                     const data = snapshot.data();
                     
-                    if (data.serverOnline === false && currentUser.email.toLowerCase() !== ADMIN_GMAIL.toLowerCase()) {
+                    if (data.serverOnline === false && !isAdmin(currentUser?.email)) {
                         currentChattingWith.innerText = "⚠️ SERVER OPERATION PAUSED BY ADMINISTRATOR";
                         footerInputDeck.classList.add("hidden");
                         chatBox.innerHTML = "<div style='text-align:center; padding: 40px; color:#667781;'>The administrator has temporarily restricted communication channels.</div>";
@@ -312,7 +338,7 @@
                         sysAnnouncement.classList.add("hidden");
                     }
 
-                    if (currentUser.email.toLowerCase() === ADMIN_GMAIL.toLowerCase()) {
+                    if (isAdmin(currentUser?.email)) {
                         killSwitchBtn.innerText = data.serverOnline === false ? "RESUME SERVER" : "SHUTDOWN CHAT";
                         killSwitchBtn.style.background = data.serverOnline === false ? "#00a884" : "#ea0038";
                     }
@@ -450,7 +476,7 @@
 
             document.getElementById("ban-user-btn").onclick = async () => {
                 const target = modTargetInput.value.trim().toLowerCase();
-                if(!target || target === ADMIN_GMAIL.toLowerCase()) return alert("Invalid operation entry action target routing flag path sequence loop.");
+                if(!target || isAdmin(target)) return alert("Invalid operation entry action target routing flag path sequence loop.");
                 await setDoc(doc(db, "bans", target), { banned: true, timestamp: serverTimestamp() });
                 await setDoc(doc(db, "kicks", target), { kicked: true });
                 alert(`User ${target} logged on system network blacklist ban matrix.`);
@@ -467,7 +493,7 @@
 
             document.getElementById("kick-user-btn").onclick = async () => {
                 const target = modTargetInput.value.trim().toLowerCase();
-                if(!target || target === ADMIN_GMAIL.toLowerCase()) return;
+                if(!target || isAdmin(target)) return;
                 await setDoc(doc(db, "kicks", target), { kicked: true });
                 alert(`Kick intercept tracking broadcast single drop executed targeting node: ${target}`);
                 modTargetInput.value = "";
