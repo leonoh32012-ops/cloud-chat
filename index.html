@@ -3,47 +3,102 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Google Cloud Chat</title>
+    <title>Cloud Chat - Ultimate Admin Edition</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background-color: #e5ddd5; height: 100vh; display: flex; justify-content: center; align-items: center; }
-        #auth-container, #chat-container { background: white; width: 400px; height: 600px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); display: flex; flex-direction: column; overflow: hidden; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f2f5; height: 100vh; display: flex; justify-content: center; align-items: center; overflow: hidden; }
+        
+        #auth-container { background: white; width: 450px; height: 500px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); display: flex; flex-direction: column; overflow: hidden; justify-content: center; align-items: center; }
         .hidden { display: none !important; }
         
         /* Auth Styles */
-        .auth-box { padding: 30px; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; text-align: center; }
-        .auth-box h2 { margin-bottom: 10px; color: #075e54; }
-        .auth-box p { color: #666; margin-bottom: 30px; }
-        .google-btn { display: flex; align-items: center; gap: 10px; padding: 12px 24px; background: white; color: #757575; border: 1px solid #ddd; border-radius: 5px; cursor: pointer; font-size: 16px; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: background 0.2s; }
-        .google-btn:hover { background: #f7f7f7; }
-        .google-icon { width: 20px; height: 20px; }
+        .auth-box { padding: 40px; text-align: center; width: 100%; }
+        .auth-box h2 { margin-bottom: 12px; color: #008069; font-size: 28px; }
+        .auth-box p { color: #667781; margin-bottom: 35px; font-size: 15px; }
+        .google-btn { display: inline-flex; align-items: center; gap: 12px; padding: 14px 28px; background: white; color: #54656f; border: 1px solid #e1e9eb; border-radius: 24px; cursor: pointer; font-size: 16px; font-weight: 600; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .google-btn:hover { background: #f0f2f5; }
+        .google-icon { width: 22px; height: 22px; }
 
-        /* Chat Styles */
-        .chat-header { background: #075e54; color: white; padding: 15px; display: flex; justify-content: space-between; align-items: center; }
-        .chat-header button { background: transparent; color: white; border: 1px solid white; padding: 5px 10px; border-radius: 3px; cursor: pointer; }
-        #search-box { padding: 10px; background: #f6f6f6; border-bottom: 1px solid #ddd; display: flex; gap: 5px; }
-        #search-box input { flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
-        #search-box button { background: #128c7e; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; }
+        /* Ban Screen layout overlay */
+        #ban-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #ea0038; color: white; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 9999; text-align: center; font-size: 24px; font-weight: bold; }
+        #ban-overlay p { font-size: 16px; margin-top: 10px; opacity: 0.9; }
+
+        /* Full Grid Layout */
+        #chat-container { width: 100vw; height: 100vh; display: grid; grid-template-columns: 320px 1fr; background-color: #fff; }
+        #chat-container.show-admin { grid-template-columns: 320px 1fr 340px; }
         
-        #chat-box { flex: 1; padding: 15px; overflow-y: auto; background: #efeae2; display: flex; flex-direction: column; gap: 10px; }
-        .msg { padding: 8px 12px; border-radius: 8px; max-width: 75%; position: relative; font-size: 15px; word-break: break-word; display: flex; flex-direction: column; }
-        .msg.sent { background: #d9fdd3; align-self: flex-end; }
-        .msg.received { background: white; align-self: flex-start; }
-        .msg img, .msg video { max-width: 100%; border-radius: 5px; margin-top: 5px; }
-        .time { font-size: 10px; color: #777; align-self: flex-end; margin-top: 4px; }
+        /* Left Sidebar Panel */
+        .sidebar { background: #ffffff; border-right: 1px solid #e9edef; display: flex; flex-direction: column; }
+        .sidebar-header { background: #f0f2f5; padding: 16px; display: flex; justify-content: space-between; align-items: center; height: 60px; }
+        #user-display { font-weight: 600; color: #111b21; font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 180px; }
+        .logout-btn { background: #ea0038; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600; }
+        
+        .search-area { padding: 12px; background: #fff; border-bottom: 1px solid #e9edef; display: flex; flex-direction: column; gap: 8px; }
+        .search-area input { width: 100%; padding: 10px 14px; border: none; background: #f0f2f5; border-radius: 8px; font-size: 14px; outline: none; }
+        .search-area button { width: 100%; background: #008069; color: white; border: none; padding: 10px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 14px; }
+        
+        .active-user-list { flex: 1; padding: 15px; background: #fff; }
+        .active-card { background: #f0f2f5; border-left: 4px solid #008069; padding: 12px; border-radius: 0 8px 8px 0; font-size: 14px; color: #111b21; }
+        .active-card small { color: #667781; display: block; margin-bottom: 4px; font-weight: bold; }
 
-        .input-area { padding: 10px; background: #f0f0f0; display: flex; align-items: center; gap: 8px; }
-        .input-area input[type="text"] { flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 20px; outline: none; }
-        .input-area button { background: #128c7e; color: white; border: none; padding: 10px 16px; border-radius: 50%; cursor: pointer; font-weight: bold; }
-        .file-label { cursor: pointer; font-size: 20px; color: #555; padding: 5px; }
+        /* Main Conversation Engine */
+        .main-chat-window { display: flex; flex-direction: column; background: #efeae2; position: relative; }
+        .main-chat-window::before { content: ""; position: absolute; top:0; left:0; width:100%; height:100%; background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png'); opacity: 0.05; pointer-events: none; }
+        
+        .main-header { height: 60px; background: #f0f2f5; padding: 0 20px; display: flex; align-items: center; border-bottom: 1px solid #e9edef; z-index: 1; justify-content: space-between; }
+        #current-chatting-with { font-size: 15px; color: #111b21; font-weight: 600; }
+
+        #chat-box { flex: 1; padding: 25px 40px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; z-index: 1; }
+        
+        /* Chat System Announcements Banner */
+        .system-banner { background: #ffeecd; color: #7a5200; text-align: center; padding: 8px; font-size: 13px; font-weight: 600; border-bottom: 1px solid #ffd080; z-index: 2; }
+
+        /* Chat Bubbles */
+        .msg { padding: 8px 14px; border-radius: 8px; max-width: 65%; font-size: 15px; word-break: break-word; display: flex; flex-direction: column; box-shadow: 0 1px 1px rgba(0,0,0,0.05); position: relative; }
+        .msg.sent { background: #d9fdd3; align-self: flex-end; border-top-right-radius: 0; }
+        .msg.received { background: white; align-self: flex-start; border-top-left-radius: 0; }
+        .msg img, .msg video { max-width: 100%; max-height: 280px; object-fit: contain; border-radius: 6px; margin-top: 6px; }
+        .time { font-size: 10px; color: #667781; align-self: flex-end; margin-top: 5px; }
+
+        /* Bottom Controls Box */
+        .input-area { padding: 12px 30px; background: #f0f2f5; display: flex; align-items: center; gap: 15px; z-index: 1; }
+        .input-area input[type="text"] { flex: 1; padding: 12px 20px; border: none; background: white; border-radius: 8px; outline: none; font-size: 15px; }
+        .input-area button { background: #008069; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        .file-label { cursor: pointer; font-size: 24px; color: #54656f; }
         #file-input { display: none; }
+
+        /* RIGHT SIDEBAR PANEL: ADMIN COMMAND CENTER */
+        .admin-panel { background: #202c33; color: #e9edef; border-left: 1px solid #3b4a54; display: flex; flex-direction: column; padding: 20px; z-index: 10; }
+        .admin-panel h3 { color: #00a884; font-size: 18px; margin-bottom: 15px; border-bottom: 1px solid #3b4a54; padding-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+        .admin-sec { background: #111b21; padding: 12px; border-radius: 8px; margin-bottom: 15px; }
+        .admin-sec h4 { font-size: 13px; color: #8696a0; margin-bottom: 8px; text-transform: uppercase; }
+        .admin-sec input { width: 100%; padding: 8px; background: #2a3942; border: none; border-radius: 4px; color: white; font-size: 13px; margin-bottom: 8px; outline: none; }
+        .admin-btn { width: 100%; padding: 8px; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 13px; margin-bottom: 5px; }
+        .btn-danger { background: #ea0038; color: white; }
+        .btn-safe { background: #00a884; color: white; }
+        .btn-warn { background: #e07a5f; color: white; }
+        
+        .kill-switch-box { display: flex; align-items: center; justify-content: space-between; padding: 5px 0; }
+        
+        /* Directory Log Tracking lists */
+        .roster-list { max-height: 120px; overflow-y: auto; font-size: 12px; display: flex; flex-direction: column; gap: 4px; margin-top: 5px; }
+        .roster-item { background: #202c33; padding: 6px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; }
+        .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+        .dot-online { background: #00e676; }
+        .dot-offline { background: #9e9e9e; }
     </style>
 </head>
 <body>
 
+    <div id="ban-overlay" class="hidden">
+        🛑 ACCESS DENIED
+        <p>Your account has been permanently banned from this server by the developer administration.</p>
+    </div>
+
     <div id="auth-container">
         <div class="auth-box">
-            <h2>Welcome to Cloud Chat</h2>
-            <p>Connect instantly and securely using your Google Account.</p>
+            <h2>Cloud Chat Platform</h2>
+            <p>Connect instantly with real-time encrypted data processing.</p>
             <button class="google-btn" id="google-login-btn">
                 <img class="google-icon" src="https://fonts.gstatic.com/s/i/productlogos/googleg/v6/web-24dp/logo_googleg_color_24dp.png" alt="Google Logo">
                 Sign in with Google
@@ -52,31 +107,86 @@
     </div>
 
     <div id="chat-container" class="hidden">
-        <div class="chat-header">
-            <span id="user-display">Logged in as...</span>
-            <button id="logout-btn">Logout</button>
+        
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <span id="user-display">Connecting...</span>
+                <button id="logout-btn" class="logout-btn">Logout</button>
+            </div>
+            
+            <div class="search-area">
+                <input type="text" id="target-user-input" placeholder="Enter target Gmail address...">
+                <button id="start-chat-btn">Open Chat Feed</button>
+            </div>
+            
+            <div class="active-user-list">
+                <div class="active-card">
+                    <small>ACTIVE LIVE ROOM</small>
+                    <span id="sidebar-current-target">None Active</span>
+                </div>
+            </div>
         </div>
-        <div id="search-box">
-            <input type="text" id="target-user-input" placeholder="Enter Friend's Gmail to Chat...">
-            <button id="start-chat-btn">Connect</button>
+
+        <div class="main-chat-window">
+            <div id="sys-announcement" class="system-banner hidden"></div>
+            
+            <div class="main-header">
+                <span id="current-chatting-with">Select an active user feed from the system grid</span>
+            </div>
+            
+            <div id="chat-box"></div>
+            
+            <div class="input-area" id="footer-input-deck">
+                <label for="file-input" class="file-label">📁</label>
+                <input type="file" id="file-input" accept="image/*,video/*">
+                <input type="text" id="message-input" placeholder="Type a message...">
+                <button id="send-btn">Send</button>
+            </div>
         </div>
-        <h4 id="current-chatting-with" style="margin: 5px 15px; color: #555; font-size: 13px;">No active chat selected</h4>
-        <div id="chat-box"></div>
-        <div class="input-area">
-            <label for="file-input" class="file-label">📁</label>
-            <input type="file" id="file-input" accept="image/*,video/*">
-            <input type="text" id="message-input" placeholder="Type a message...">
-            <button id="send-btn">➔</button>
+
+        <div id="admin-panel" class="admin-panel hidden">
+            <h3>Admin Space 👑</h3>
+            
+            <div class="admin-sec">
+                <h4>Server Operations</h4>
+                <div class="kill-switch-box">
+                    <span>Chat Server Online:</span>
+                    <button id="kill-switch-btn" class="admin-btn btn-danger" style="width: auto; margin:0; padding: 5px 10px;">SHUTDOWN</button>
+                </div>
+            </div>
+
+            <div class="admin-sec">
+                <h4>System Announcement</h4>
+                <input type="text" id="announcement-input" placeholder="Type alert headline text...">
+                <button id="post-announcement-btn" class="admin-btn btn-safe">Broadcast Alert</button>
+                <button id="clear-announcement-btn" class="admin-btn btn-warn">Clear Alert</button>
+            </div>
+
+            <div class="admin-sec">
+                <h4>Moderation & Ban Controls</h4>
+                <input type="text" id="mod-target-input" placeholder="Target user Gmail address...">
+                <button id="ban-user-btn" class="admin-btn btn-danger">Enforce Permanent Ban</button>
+                <button id="unban-user-btn" class="admin-btn btn-safe">Pardon (Unban) User</button>
+                <button id="kick-user-btn" class="admin-btn btn-warn">Kick Instantly</button>
+            </div>
+
+            <div class="admin-sec" style="flex: 1; display:flex; flex-direction:column;">
+                <h4>User Registry Audit</h4>
+                <div class="roster-list" id="admin-user-roster">
+                    </div>
+            </div>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, doc, setDoc, query, orderBy, onSnapshot, serverTimestamp, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
-        // Your Config
+        // MASTER CONFIGURATION IDENTIFICATION KEY
+        const ADMIN_GMAIL = "your_actual_email@gmail.com"; // 👈 REPLACE WITH YOUR EXACT GOOGLE ACCOUNT GMAIL ADDRESS!
+
         const firebaseConfig = {
             apiKey: "AIzaSyBOMhYlrzoSgabnphKfZuT8YW52ZkeL9Os",
             authDomain: "temu-rng-game.firebaseapp.com",
@@ -92,76 +202,163 @@
         const db = getFirestore(app);
         const storage = getStorage(app);
         const googleProvider = new GoogleAuthProvider();
+        googleProvider.setCustomParameters({ prompt: 'select_account' });
 
-        // Global States
         let currentUser = null;
         let activeChatEmail = "";
         let unsubscribeChat = null;
 
-        // UI Elements
+        // Dom Connectors
         const authContainer = document.getElementById("auth-container");
         const chatContainer = document.getElementById("chat-container");
-        const googleLoginBtn = document.getElementById("google-login-btn");
+        const adminPanel = document.getElementById("admin-panel");
+        const banOverlay = document.getElementById("ban-overlay");
         const userDisplay = document.getElementById("user-display");
         const chatBox = document.getElementById("chat-box");
         const messageInput = document.getElementById("message-input");
         const fileInput = document.getElementById("file-input");
-        const sendBtn = document.getElementById("send-btn");
-        const targetUserInput = document.getElementById("target-user-input");
-        const startChatBtn = document.getElementById("start-chat-btn");
         const currentChattingWith = document.getElementById("current-chatting-with");
+        const sidebarCurrentTarget = document.getElementById("sidebar-current-target");
+        const targetUserInput = document.getElementById("target-user-input");
+        const sysAnnouncement = document.getElementById("sys-announcement");
+        const footerInputDeck = document.getElementById("footer-input-deck");
 
-        // Trigger Google Login Popup
-        googleLoginBtn.addEventListener("click", async () => {
-            try {
-                await signInWithPopup(auth, googleProvider);
-            } catch (err) {
-                alert("Login Error: " + err.message);
+        // Admin Buttons Connectors
+        const killSwitchBtn = document.getElementById("kill-switch-btn");
+        const announcementInput = document.getElementById("announcement-input");
+        const modTargetInput = document.getElementById("mod-target-input");
+        const adminUserRoster = document.getElementById("admin-user-roster");
+
+        // Trigger Google Login
+        document.getElementById("google-login-btn").addEventListener("click", async () => {
+            try { await signInWithPopup(auth, googleProvider); } catch (e) { alert(e.message); }
+        });
+        document.getElementById("logout-btn").addEventListener("click", async () => {
+            if (currentUser) {
+                await setDoc(doc(db, "presence", currentUser.email.replace(/\./g, "_")), { email: currentUser.email, status: "offline", lastSeen: serverTimestamp() }, { merge: true });
             }
+            signOut(auth);
         });
 
-        // Logout
-        document.getElementById("logout-btn").addEventListener("click", () => signOut(auth));
-
-        // Manage User Login State
-        onAuthStateChanged(auth, (user) => {
+        // Dynamic State Session Engine
+        onAuthStateChanged(auth, async (user) => {
             if (user) {
                 currentUser = user;
-                authContainer.classList.add("hidden");
-                chatContainer.classList.remove("hidden");
-                userDisplay.innerText = `👋 ${user.displayName}`;
+                const emailClean = user.email.toLowerCase();
+
+                // 1. Audit check security wall if user is on Ban Roster list
+                onSnapshot(doc(db, "bans", emailClean), async (banDoc) => {
+                    if (banDoc.exists()) {
+                        authContainer.classList.add("hidden");
+                        chatContainer.classList.add("hidden");
+                        banOverlay.classList.remove("hidden");
+                        await signOut(auth);
+                        return;
+                    }
+                    
+                    // 2. Clear block flags and initialize presence profile tracking logs
+                    banOverlay.classList.add("hidden");
+                    authContainer.classList.add("hidden");
+                    chatContainer.classList.remove("hidden");
+                    userDisplay.innerText = `👤 ${user.displayName || user.email}`;
+
+                    await setDoc(doc(db, "presence", emailClean.replace(/\./g, "_")), {
+                        name: user.displayName || user.email,
+                        email: emailClean,
+                        status: "online",
+                        lastSeen: serverTimestamp()
+                    }, { merge: true });
+
+                    // 3. Evaluate Admin Access Level Clearance Engine Switch
+                    if (emailClean === ADMIN_GMAIL.toLowerCase()) {
+                        chatContainer.classList.add("show-admin");
+                        adminPanel.classList.remove("hidden");
+                        runAdminEngineTracker();
+                    } else {
+                        chatContainer.classList.remove("show-admin");
+                        adminPanel.classList.add("hidden");
+                    }
+                    
+                    listenToSystemConfigurations();
+                });
             } else {
                 currentUser = null;
                 authContainer.classList.remove("hidden");
                 chatContainer.classList.add("hidden");
-                if(unsubscribeChat) unsubscribeChat();
+                adminPanel.classList.add("hidden");
+                if (unsubscribeChat) unsubscribeChat();
             }
         });
 
-        // Connect with a friend using their Google Email
-        startChatBtn.addEventListener("click", () => {
-            const target = targetUserInput.value.trim().toLowerCase();
-            if(!target) return alert("Please type your friend's Gmail address");
-            if(target === currentUser.email.toLowerCase()) return alert("You cannot chat with yourself!");
-            
-            activeChatEmail = target;
-            currentChattingWith.innerText = `Chatting with: ${activeChatEmail}`;
-            loadMessages();
+        // Read Live System Configurations Controls (Kill Switch and Announcement Banners)
+        function listenToSystemConfigurations() {
+            // Watch Server Operational State Status
+            onSnapshot(doc(db, "system", "config"), (snapshot) => {
+                if (snapshot.exists()) {
+                    const data = snapshot.data();
+                    
+                    // If server operational switch toggled to killed state offline
+                    if (data.serverOnline === false && currentUser.email.toLowerCase() !== ADMIN_GMAIL.toLowerCase()) {
+                        currentChattingWith.innerText = "⚠️ SERVER OPERATION PAUSED BY ADMINISTRATOR";
+                        footerInputDeck.classList.add("hidden");
+                        chatBox.innerHTML = "<div style='text-align:center; padding: 40px; color:#667781;'>The administrator has temporarily restricted communication channels.</div>";
+                        if (unsubscribeChat) unsubscribeChat();
+                    } else {
+                        footerInputDeck.classList.remove("hidden");
+                    }
+
+                    // Display Announcement Headline text
+                    if (data.announcement) {
+                        sysAnnouncement.innerText = `📣 SYSTEM NOTICE: ${data.announcement}`;
+                        sysAnnouncement.classList.remove("hidden");
+                    } else {
+                        sysAnnouncement.classList.add("hidden");
+                    }
+
+                    // Update admin UI interface button display text
+                    if (currentUser.email.toLowerCase() === ADMIN_GMAIL.toLowerCase()) {
+                        killSwitchBtn.innerText = data.serverOnline === false ? "RESUME SERVER" : "SHUTDOWN CHAT";
+                        killSwitchBtn.style.background = data.serverOnline === false ? "#00a884" : "#ea0038";
+                    }
+                }
+            });
+
+            // Handle active direct user kicker signals
+            onSnapshot(doc(db, "kicks", currentUser.email.toLowerCase()), async (snapshot) => {
+                if (snapshot.exists()) {
+                    alert("⚠️ Admin Action: You have been kicked out of the current active live session chat box module.");
+                    await deleteDoc(doc(db, "kicks", currentUser.email.toLowerCase()));
+                    location.reload();
+                }
+            });
+        }
+
+        // Active Connection Initialization Target Handlers
+        document.getElementById("start-chat-btn").addEventListener("click", () => {
+            setupActiveConversationTarget(targetUserInput.value.trim());
+            targetUserInput.value = "";
         });
 
-        // Send Message Handler
+        function setupActiveConversationTarget(emailAddress) {
+            const target = emailAddress.toLowerCase();
+            if (!target) return alert("Please specify target email");
+            if (target === currentUser.email.toLowerCase()) return alert("Self indexing operations loop rejected.");
+            
+            activeChatEmail = target;
+            currentChattingWith.innerText = `💬 Active Live Room Workspace: ${activeChatEmail}`;
+            sidebarCurrentTarget.innerText = activeChatEmail;
+            loadMessages();
+        }
+
+        // Send Message Processing Engine
         async function sendChatMessage() {
-            if(!activeChatEmail) return alert("Please connect with a friend's Gmail before texting!");
+            if(!activeChatEmail) return alert("Select target user line sequence node workspace path first.");
             const text = messageInput.value.trim();
             const file = fileInput.files[0];
-            
             if (!text && !file) return;
 
-            let fileUrl = "";
-            let fileType = "";
-
-            messageInput.value = ""; 
-            fileInput.value = "";
+            messageInput.value = ""; fileInput.value = "";
+            let fileUrl = "", fileType = "";
 
             if (file) {
                 try {
@@ -169,10 +366,7 @@
                     const uploadTask = await uploadBytes(storageRef, file);
                     fileUrl = await getDownloadURL(uploadTask.ref);
                     fileType = file.type.startsWith("image/") ? "image" : "video";
-                } catch (e) {
-                    console.error("Upload failed", e);
-                    return alert("Failed to attach media.");
-                }
+                } catch (e) { return alert("File attachment upload array tracking sequence failed."); }
             }
 
             try {
@@ -184,69 +378,117 @@
                     fileType: fileType,
                     timestamp: serverTimestamp()
                 });
-            } catch (e) {
-                console.error("Database storage failed", e);
-            }
+            } catch (e) { alert("Message delivery denied: Database verification rejected."); }
         }
 
-        sendBtn.addEventListener("click", sendChatMessage);
+        document.getElementById("send-btn").addEventListener("click", sendChatMessage);
         messageInput.addEventListener("keypress", (e) => { if(e.key === 'Enter') sendChatMessage(); });
 
-        // Load targeted private chat data stream
+        // Database message content query listener pipeline mapping
         function loadMessages() {
             if (unsubscribeChat) unsubscribeChat();
-
             const myEmail = currentUser.email.toLowerCase();
             const friendEmail = activeChatEmail;
 
             const q = query(collection(db, "secure_messages"), orderBy("timestamp", "asc"));
-
             unsubscribeChat = onSnapshot(q, (snapshot) => {
                 chatBox.innerHTML = "";
                 snapshot.forEach((doc) => {
                     const data = doc.data();
-                    
-                    const isMyMessageToFriend = (data.sender === myEmail && data.receiver === friendEmail);
-                    const isFriendMessageToMe = (data.sender === friendEmail && data.receiver === myEmail);
-
-                    if (isMyMessageToFriend || isFriendMessageToMe) {
+                    if ((data.sender === myEmail && data.receiver === friendEmail) || (data.sender === friendEmail && data.receiver === myEmail)) {
                         const msgDiv = document.createElement("div");
                         msgDiv.classList.add("msg", data.sender === myEmail ? "sent" : "received");
 
                         if(data.message) {
-                            const textSpan = document.createElement("span");
-                            textSpan.innerText = data.message;
-                            msgDiv.appendChild(textSpan);
+                            const textSpan = document.createElement("span"); textSpan.innerText = data.message; msgDiv.appendChild(textSpan);
                         }
-
                         if (data.fileUrl) {
                             if (data.fileType === "image") {
-                                const img = document.createElement("img");
-                                img.src = data.fileUrl;
-                                msgDiv.appendChild(img);
-                            } else if (data.fileType === "video") {
-                                const vid = document.createElement("video");
-                                vid.src = data.fileUrl;
-                                vid.controls = true;
-                                msgDiv.appendChild(vid);
+                                const img = document.createElement("img"); img.src = data.fileUrl; msgDiv.appendChild(img);
+                            } else {
+                                const vid = document.createElement("video"); vid.src = data.fileUrl; vid.controls = true; msgDiv.appendChild(vid);
                             }
                         }
-
-                        const timeSpan = document.createElement("span");
-                        timeSpan.classList.add("time");
+                        const timeSpan = document.createElement("span"); timeSpan.classList.add("time");
                         if (data.timestamp) {
-                            const date = data.timestamp.toDate();
-                            timeSpan.innerText = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                        } else {
-                            timeSpan.innerText = "Sending...";
-                        }
+                            timeSpan.innerText = data.timestamp.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                        } else { timeSpan.innerText = "..."; }
                         msgDiv.appendChild(timeSpan);
-
                         chatBox.appendChild(msgDiv);
                     }
                 });
                 chatBox.scrollTop = chatBox.scrollHeight;
             });
+        }
+
+        /* MASTER SUPER ADMIN MODULE ENGINE EXECUTIONS LOGIC */
+        function runAdminEngineTracker() {
+            // Track full global user directories presence matrices logs
+            onSnapshot(collection(db, "presence"), (snapshot) => {
+                adminUserRoster.innerHTML = "";
+                snapshot.forEach((doc) => {
+                    const data = doc.data();
+                    const item = document.createElement("div");
+                    item.classList.add("roster-item");
+                    item.innerHTML = `
+                        <span style="overflow:hidden; text-overflow:ellipsis; max-width:180px;" title="${data.email}">${data.name}</span>
+                        <span class="status-dot ${data.status === 'online' ? 'dot-online' : 'dot-offline'}" title="${data.status}"></span>
+                    `;
+                    // Click an auditing item line inside tracking list to populate target modification inputs instantly!
+                    item.addEventListener("click", () => {
+                        modTargetInput.value = data.email;
+                        setupActiveConversationTarget(data.email);
+                    });
+                    adminUserRoster.appendChild(item);
+                });
+            });
+
+            // Server Kill Switch Handler Event Listener
+            killSwitchBtn.onclick = async () => {
+                const currentStatus = killSwitchBtn.innerText === "SHUTDOWN CHAT";
+                await setDoc(doc(db, "system", "config"), { serverOnline: !currentStatus }, { merge: true });
+            };
+
+            // Post Global Broadcasting System Headline Notice Alerts Banner
+            document.getElementById("post-announcement-btn").onclick = async () => {
+                const text = announcementInput.value.trim();
+                if(!text) return;
+                await setDoc(doc(db, "system", "config"), { announcement: text }, { merge: true });
+                announcementInput.value = "";
+            };
+
+            // Clear Global Broadcasting Banners Data Mapping
+            document.getElementById("clear-announcement-btn").onclick = async () => {
+                await setDoc(doc(db, "system", "config"), { announcement: "" }, { merge: true });
+            };
+
+            // Enforce Immediate User Ban Rules Execution Database Logs Mutation
+            document.getElementById("ban-user-btn").onclick = async () => {
+                const target = modTargetInput.value.trim().toLowerCase();
+                if(!target || target === ADMIN_GMAIL.toLowerCase()) return alert("Invalid operation entry action target routing flag path sequence loop.");
+                await setDoc(doc(db, "bans", target), { banned: true, timestamp: serverTimestamp() });
+                await setDoc(doc(db, "kicks", target), { kicked: true });
+                alert(`User ${target} logged on system network blacklist ban matrix.`);
+                modTargetInput.value = "";
+            };
+
+            // Pardon (Unban) User Node
+            document.getElementById("unban-user-btn").onclick = async () => {
+                const target = modTargetInput.value.trim().toLowerCase();
+                if(!target) return;
+                await deleteDoc(doc(db, "bans", target));
+                alert(`User ${target} pardoned and wiped off blacklist matrices records.`);
+                modTargetInput.value = "";
+            };
+
+            // Kick Instantly Module Triggers Pipeline Signal
+            document.getElementById("kick-user-btn").onclick = async () => {
+                const target = modTargetInput.value.trim().toLowerCase();
+                if(!target || target === ADMIN_GMAIL.toLowerCase()) return;
+                await setDoc(doc(db, "kicks", target), { kicked: true });
+                alert(`Kick intercept tracking broadcast single drop executed targeting node: ${target}`);
+                modTargetInput.value = "";
+            };
         }
     </script>
 </body>
