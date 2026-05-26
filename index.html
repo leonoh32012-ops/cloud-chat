@@ -19,6 +19,16 @@
         .google-btn:hover { background: #f0f2f5; }
         .google-icon { width: 22px; height: 22px; }
 
+        /* Device Prompt Modal Overlay */
+        #device-modal { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.65); display: flex; justify-content: center; align-items: center; z-index: 10000; backdrop-filter: blur(4px); }
+        .modal-box { background: white; padding: 35px; border-radius: 16px; width: 420px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); text-align: center; border: 1px solid rgba(0,0,0,0.05); }
+        .modal-box h3 { font-size: 22px; color: #111b21; margin-bottom: 12px; font-weight: 700; }
+        .modal-box p { font-size: 14px; color: #667781; margin-bottom: 24px; line-height: 1.4; }
+        .modal-box input { width: 100%; padding: 14px; border: 2px solid #e9edef; background: #f8f9fa; border-radius: 10px; font-size: 15px; outline: none; margin-bottom: 20px; text-align: center; transition: all 0.2s ease; }
+        .modal-box input:focus { border-color: #008069; background: white; }
+        .modal-box button { width: 100%; background: #008069; color: white; border: none; padding: 14px; border-radius: 10px; font-weight: 600; cursor: pointer; font-size: 16px; box-shadow: 0 2px 5px rgba(0,128,105,0.2); }
+        .modal-box button:hover { background: #016b58; }
+
         /* Ban Screen layout overlay */
         #ban-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #ea0038; color: white; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 9999; text-align: center; font-size: 24px; font-weight: bold; }
         #ban-overlay p { font-size: 16px; margin-top: 10px; opacity: 0.9; }
@@ -84,9 +94,11 @@
         .kill-switch-box { display: flex; align-items: center; justify-content: space-between; padding: 5px 0; }
         
         /* Directory Log Tracking lists */
-        .roster-list { max-height: 120px; overflow-y: auto; font-size: 12px; display: flex; flex-direction: column; gap: 4px; margin-top: 5px; }
-        .roster-item { background: #202c33; padding: 6px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+        .roster-list { max-height: 140px; overflow-y: auto; font-size: 12px; display: flex; flex-direction: column; gap: 4px; margin-top: 5px; }
+        .roster-item { background: #202c33; padding: 8px; border-radius: 4px; display: flex; flex-direction: column; gap: 2px; cursor: pointer; }
         .roster-item:hover { background: #2a3942; }
+        .roster-row { display: flex; justify-content: space-between; align-items: center; }
+        .roster-device { font-size: 10px; color: #8696a0; font-style: italic; }
         .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
         .dot-online { background: #00e676; }
         .dot-offline { background: #9e9e9e; }
@@ -97,6 +109,15 @@
     <div id="ban-overlay" class="hidden">
         🛑 ACCESS DENIED
         <p>Your account has been permanently banned from this server by the developer administration.</p>
+    </div>
+
+    <div id="device-modal" class="hidden">
+        <div class="modal-box">
+            <h3>Device Setup Verification</h3>
+            <p>Which hardware device are you using right now to connect to the network profile registry?</p>
+            <input type="text" id="device-input-field" placeholder="e.g. Leo's iPhone, PC, School Laptop..." maxlength="40">
+            <button id="device-submit-btn">Initialize Workspace</button>
+        </div>
     </div>
 
     <div id="auth-container">
@@ -216,12 +237,16 @@
         let currentUser = null;
         let activeChatEmail = "";
         let unsubscribeChat = null;
+        let declaredDevice = "Unknown Device";
 
         // Dom Connectors
         const authContainer = document.getElementById("auth-container");
         const chatContainer = document.getElementById("chat-container");
         const adminPanel = document.getElementById("admin-panel");
         const banOverlay = document.getElementById("ban-overlay");
+        const deviceModal = document.getElementById("device-modal");
+        const deviceInputField = document.getElementById("device-input-field");
+        const deviceSubmitBtn = document.getElementById("device-submit-btn");
         const userDisplay = document.getElementById("user-display");
         const chatBox = document.getElementById("chat-box");
         const messageInput = document.getElementById("message-input");
@@ -239,7 +264,6 @@
         const modTargetInput = document.getElementById("mod-target-input");
         const adminUserRoster = document.getElementById("admin-user-roster");
 
-        // Helper function to check if an email is an authorized admin
         function isAdmin(email) {
             if (!email) return false;
             return ADMIN_GMAILS.map(e => e.toLowerCase()).includes(email.toLowerCase());
@@ -273,50 +297,68 @@
                     if (banDoc.exists()) {
                         authContainer.classList.add("hidden");
                         chatContainer.classList.add("hidden");
+                        deviceModal.classList.add("hidden");
                         banOverlay.classList.remove("hidden");
                         await signOut(auth);
                         return;
                     }
                     
-                    // 2. Clear block flags and initialize presence profile tracking logs
-                    banOverlay.classList.add("hidden");
+                    // 2. Open Device Registration Modal Prompt Window
                     authContainer.classList.add("hidden");
-                    chatContainer.classList.remove("hidden");
-                    userDisplay.innerText = `👤 ${user.displayName || user.email}`;
-
-                    await setDoc(doc(db, "presence", emailClean.replace(/\./g, "_")), {
-                        name: user.displayName || user.email,
-                        email: emailClean,
-                        status: "online",
-                        lastSeen: serverTimestamp()
-                    }, { merge: true });
-
-                    // 3. Evaluate Admin Access Level Clearance Engine Switch
-                    if (isAdmin(emailClean)) {
-                        adminToggleBtn.style.display = "inline-block";
-                        // Kept closed by default until toggle click events trigger
-                        chatContainer.classList.remove("show-admin");
-                        adminPanel.classList.add("hidden");
-                        runAdminEngineTracker();
-                    } else {
-                        adminToggleBtn.style.display = "none";
-                        chatContainer.classList.remove("show-admin");
-                        adminPanel.classList.add("hidden");
-                    }
-                    
-                    listenToSystemConfigurations();
+                    banOverlay.classList.add("hidden");
+                    deviceModal.classList.remove("hidden");
+                    deviceInputField.value = "";
+                    deviceInputField.focus();
                 });
             } else {
                 currentUser = null;
                 authContainer.classList.remove("hidden");
                 chatContainer.classList.add("hidden");
                 adminPanel.classList.add("hidden");
+                deviceModal.classList.add("hidden");
                 adminToggleBtn.style.display = "none";
                 if (unsubscribeChat) unsubscribeChat();
             }
         });
 
-        // Read Live System Configurations Controls (Kill Switch and Announcement Banners)
+        // Device Submit Registration
+        deviceSubmitBtn.addEventListener("click", async () => {
+            const val = deviceInputField.value.trim();
+            declaredDevice = val ? val : "Standard Generic Node";
+            deviceModal.classList.add("hidden");
+            chatContainer.classList.remove("hidden");
+
+            const emailClean = currentUser.email.toLowerCase();
+            userDisplay.innerText = `👤 ${currentUser.displayName || currentUser.email}`;
+
+            // Save Presence Data to FireStore along with device info
+            await setDoc(doc(db, "presence", emailClean.replace(/\./g, "_")), {
+                name: currentUser.displayName || currentUser.email,
+                email: emailClean,
+                status: "online",
+                device: declaredDevice,
+                lastSeen: serverTimestamp()
+            }, { merge: true });
+
+            // Evaluate Admin Access Level
+            if (isAdmin(emailClean)) {
+                adminToggleBtn.style.display = "inline-block";
+                chatContainer.classList.remove("show-admin");
+                adminPanel.classList.add("hidden");
+                runAdminEngineTracker();
+            } else {
+                adminToggleBtn.style.display = "none";
+                chatContainer.classList.remove("show-admin");
+                adminPanel.classList.add("hidden");
+            }
+            
+            listenToSystemConfigurations();
+        });
+
+        // Submit via enter key on device screen field
+        deviceInputField.addEventListener("keypress", (e) => { if(e.key === 'Enter') deviceSubmitBtn.click(); });
+
+        // Read Live System Configurations Controls
         function listenToSystemConfigurations() {
             onSnapshot(doc(db, "system", "config"), (snapshot) => {
                 if (snapshot.exists()) {
@@ -446,9 +488,15 @@
                     const data = doc.data();
                     const item = document.createElement("div");
                     item.classList.add("roster-item");
+                    
+                    const devName = data.device ? data.device : "Unknown Device";
+                    
                     item.innerHTML = `
-                        <span style="overflow:hidden; text-overflow:ellipsis; max-width:180px;" title="${data.email}">${data.name}</span>
-                        <span class="status-dot ${data.status === 'online' ? 'dot-online' : 'dot-offline'}" title="${data.status}"></span>
+                        <div class="roster-row">
+                            <span style="overflow:hidden; text-overflow:ellipsis; max-width:180px; font-weight:600;" title="${data.email}">${data.name}</span>
+                            <span class="status-dot ${data.status === 'online' ? 'dot-online' : 'dot-offline'}" title="${data.status}"></span>
+                        </div>
+                        <div class="roster-device">📱 Device: ${devName}</div>
                     `;
                     item.addEventListener("click", () => {
                         modTargetInput.value = data.email;
