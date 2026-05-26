@@ -35,6 +35,17 @@
         #ban-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #ea0038; color: white; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 9999; text-align: center; font-size: 24px; font-weight: bold; }
         #ban-overlay p { font-size: 16px; margin-top: 10px; opacity: 0.9; }
 
+        /* Account Status Card Profile Panel Modal Window Overlay */
+        #profile-panel-modal { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(17, 27, 33, 0.85); display: flex; justify-content: center; align-items: center; z-index: 12000; backdrop-filter: blur(5px); padding: 20px; }
+        .profile-card-container { background: #ffffff; border-radius: 16px; width: 100%; max-width: 400px; box-shadow: 0 12px 40px rgba(0,0,0,0.25); border: 1px solid #e9edef; overflow: hidden; display: flex; flex-direction: column; }
+        .profile-card-header { background: #008069; color: white; padding: 20px; text-align: center; font-size: 18px; font-weight: bold; position: relative; }
+        .profile-card-body { padding: 25px; display: flex; flex-direction: column; gap: 14px; }
+        .profile-data-row { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f0f2f5; padding-bottom: 8px; font-size: 14px; }
+        .profile-data-row span:first-child { color: #667781; font-weight: 600; }
+        .profile-data-row span:last-child { color: #111b21; font-weight: bold; }
+        .profile-close-btn { background: #54656f; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; font-size: 14px; text-align: center; transition: background 0.2s; margin-top: 10px; }
+        .profile-close-btn:hover { background: #111b21; }
+
         /* Full Grid Layout */
         #chat-container { width: 100vw; height: 100vh; display: grid; grid-template-columns: 320px 1fr; background-color: #fff; }
         #chat-container.show-admin { grid-template-columns: 320px 1fr 380px; }
@@ -47,6 +58,7 @@
         .token-badge { background: #e3f2fd; color: #0d47a1; font-size: 11px; padding: 4px 8px; border-radius: 20px; font-weight: bold; white-space: nowrap; border: 1px solid #bbdefb; cursor: pointer; }
 
         .header-buttons { display: flex; gap: 4px; align-items: center; }
+        .profile-trigger-top-btn { background: #54656f; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 600; }
         .logout-btn { background: #ea0038; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 600; }
         .admin-toggle-btn { background: #00a884; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 600; display: none; }
         .shop-toggle-btn { background: #ffb300; color: #5d4037; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: bold; }
@@ -62,10 +74,10 @@
         .active-card small { color: #667781; display: block; margin-bottom: 2px; font-weight: bold; text-transform: uppercase; }
 
         /* Main Conversation Engine */
-        .main-chat-window { display: flex; flex-direction: column; background: #efeae2; position: relative; }
+        .main-chat-window { display: flex; flex-direction: column; background: #efeae2; position: relative; height: 100%; min-height: 0; overflow: hidden; }
         .main-chat-window::before { content: ""; position: absolute; top:0; left:0; width:100%; height:100%; background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png'); opacity: 0.05; pointer-events: none; }
         
-        .main-header { height: 60px; background: #f0f2f5; padding: 0 20px; display: flex; align-items: center; border-bottom: 1px solid #e9edef; z-index: 1; justify-content: space-between; }
+        .main-header { height: 60px; background: #f0f2f5; padding: 0 20px; display: flex; align-items: center; border-bottom: 1px solid #e9edef; z-index: 10; justify-content: space-between; flex-shrink: 0; }
         #current-chatting-with { font-size: 14px; color: #111b21; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 60%; }
         
         .header-actions-wrapper { display: flex; gap: 8px; align-items: center; }
@@ -73,21 +85,22 @@
         .back-nav-btn { background: #54656f; color: white; border: none; padding: 6px 12px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer; display: none; }
         
         /* Calling elements panel */
-        #call-panel-interface { background: #111b21; color: white; padding: 12px 25px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #25d366; z-index: 5; font-size: 13px; }
+        #call-panel-interface { background: #111b21; color: white; padding: 12px 25px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #25d366; z-index: 15; font-size: 13px; flex-shrink: 0; }
         .call-actions-row { display: flex; gap: 8px; }
         .call-act-btn { padding: 6px 12px; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 11px; }
         .call-rec { background: #ea0038; color: white; }
         .call-sil { background: #ff9100; color: white; }
         .call-can { background: #607d8b; color: white; }
 
-        #chat-box { flex: 1; padding: 25px 40px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; z-index: 1; }
+        /* Core Flex Constraints to avoid cutting off input elements */
+        #chat-box { flex: 1; min-height: 0; padding: 25px 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; z-index: 1; }
         
         /* Chat System Announcements Banner */
-        .system-banner { background: #ffeecd; color: #7a5200; text-align: center; padding: 8px; font-size: 13px; font-weight: 600; border-bottom: 1px solid #ffd080; z-index: 2; }
-        .media-stats-ticker { background: #e1f5fe; color: #0277bd; padding: 6px 20px; font-size: 12px; font-weight: 600; z-index: 2; display: flex; justify-content: space-between; }
+        .system-banner { background: #ffeecd; color: #7a5200; text-align: center; padding: 8px; font-size: 13px; font-weight: 600; border-bottom: 1px solid #ffd080; z-index: 12; flex-shrink: 0; }
+        .media-stats-ticker { background: #e1f5fe; color: #0277bd; padding: 6px 20px; font-size: 12px; font-weight: 600; z-index: 12; display: flex; justify-content: space-between; flex-shrink: 0; }
 
         /* Chat Bubbles and Admin Override Trash Controls */
-        .msg { padding: 8px 14px; border-radius: 8px; max-width: 65%; font-size: 15px; word-break: break-word; display: flex; flex-direction: column; box-shadow: 0 1px 1px rgba(0,0,0,0.05); position: relative; }
+        .msg { padding: 8px 14px; border-radius: 8px; max-width: 75%; font-size: 15px; word-break: break-word; display: flex; flex-direction: column; box-shadow: 0 1px 1px rgba(0,0,0,0.05); position: relative; }
         .msg.sent { background: #d9fdd3; align-self: flex-end; border-top-right-radius: 0; }
         .msg.received { background: white; align-self: flex-start; border-top-left-radius: 0; }
         .msg-sender-tag { font-size: 11px; font-weight: bold; color: #0288d1; margin-bottom: 3px; display: block; }
@@ -97,27 +110,31 @@
         .admin-delete-msg-btn { background: none; border: none; color: #ea0038; cursor: pointer; font-size: 11px; font-weight: bold; }
 
         /* Bottom Controls Box & Upgrade Plus Drawer Tray */
-        .input-area { padding: 12px 20px; background: #f0f2f5; display: flex; align-items: center; gap: 10px; z-index: 5; position: relative; }
-        .input-area input[type="text"] { flex: 1; padding: 12px 16px; border: none; background: white; border-radius: 8px; outline: none; font-size: 15px; }
-        .input-area button.send-main-btn { background: #008069; color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 15px; }
+        .input-area { padding: 12px 20px; background: #f0f2f5; display: flex; align-items: center; gap: 10px; z-index: 20; flex-shrink: 0; position: relative; border-top: 1px solid #e9edef; }
+        .input-area input[type="text"] { flex: 1; padding: 12px 16px; border: none; background: white; border-radius: 8px; outline: none; font-size: 15px; min-width: 0; }
+        .input-area button.send-main-btn { background: #008069; color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 15px; flex-shrink: 0; }
         
         /* Modular Drawer Icon Plus Trigger Button */
         .plus-action-trigger { background: #54656f; color: white; border: none; width: 42px; height: 42px; border-radius: 50%; font-size: 22px; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: background 0.2s; font-weight: bold; flex-shrink: 0; }
         .plus-action-trigger:hover { background: #008069; }
         
         /* Unified Sliding Tool Tray Drawer Component */
-        .action-tray-drawer { display: none; background: #f0f2f5; border-top: 1px solid #e9edef; padding: 15px 20px; flex-direction: column; gap: 12px; z-index: 4; }
+        .action-tray-drawer { display: none; background: #f0f2f5; border-top: 1px solid #e9edef; padding: 15px 20px; flex-direction: column; gap: 12px; z-index: 18; flex-shrink: 0; }
         .action-tray-row { display: flex; align-items: center; justify-content: flex-start; gap: 12px; overflow-x: auto; padding-bottom: 4px; }
         
         .tray-action-btn { background: white; border: 1px solid #e9edef; padding: 10px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; color: #111b21; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); white-space: nowrap; }
         .tray-action-btn:hover { background: #e3f2fd; color: #0d47a1; }
         
-        .ct-transfer-subcontainer { display: flex; background: white; border-radius: 8px; padding: 8px 12px; align-items: center; gap: 8px; border: 1px solid #e9edef; margin-top: 4px; width: 100%; max-width: 400px; }
-        .ct-transfer-subcontainer input { border: none; background: #f0f2f5; padding: 8px; font-size: 13px; border-radius: 4px; outline: none; }
-        .ct-transfer-subcontainer button { background: #ffb300; color: #5d4037; font-weight: bold; border: none; padding: 8px 14px; border-radius: 4px; font-size: 13px; cursor: pointer; }
+        /* 💸 RECONFIGURED CLOUD TOKEN P2P PLATFORM FOR THE TRAY (TYPABLE) */
+        .ct-transfer-subcontainer { display: flex; background: white; border-radius: 8px; padding: 10px 12px; flex-wrap: wrap; align-items: center; gap: 8px; border: 1px solid #e9edef; margin-top: 4px; width: 100%; max-width: 550px; box-shadow: 0 1px 2px rgba(0,0,0,0.03); }
+        .ct-transfer-subcontainer span { font-size: 12px; font-weight: bold; color: #54656f; }
+        .ct-transfer-subcontainer input[type="text"] { border: 1px solid #e9edef; background: #f0f2f5; padding: 8px 10px; font-size: 13px; border-radius: 4px; outline: none; flex: 2; min-width: 150px; color: #111b21; }
+        .ct-transfer-subcontainer input[type="number"] { border: 1px solid #e9edef; background: #f0f2f5; padding: 8px 10px; font-size: 13px; border-radius: 4px; outline: none; flex: 1; min-width: 80px; color: #111b21; }
+        .ct-transfer-subcontainer button { background: #ffb300; color: #5d4037; font-weight: bold; border: none; padding: 8px 14px; border-radius: 4px; font-size: 13px; cursor: pointer; white-space: nowrap; }
+        .ct-transfer-subcontainer button:hover { background: #ffa000; }
 
         /* RIGHT SIDEBAR PANEL: ADMIN COMMAND CENTER */
-        .admin-panel { background: #202c33; color: #e9edef; border-left: 1px solid #3b4a54; display: flex; flex-direction: column; padding: 15px; z-index: 10; overflow-y: auto; }
+        .admin-panel { background: #202c33; color: #e9edef; border-left: 1px solid #3b4a54; display: flex; flex-direction: column; padding: 15px; z-index: 100; overflow-y: auto; }
         .admin-panel h3 { color: #00a884; font-size: 17px; margin-bottom: 12px; border-bottom: 1px solid #3b4a54; padding-bottom: 6px; display: flex; justify-content: space-between; align-items: center; }
         .admin-sec { background: #111b21; padding: 12px; border-radius: 8px; margin-bottom: 12px; }
         .admin-sec h4 { font-size: 11px; color: #00a884; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
@@ -134,15 +151,16 @@
         .audit-sub-item { padding: 4px; border-bottom: 1px solid #202c33; cursor: pointer; color: #e9edef; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .audit-sub-item:hover { color: #00e676; }
 
-        /* 🛒 FIXED SCROLLABLE MARKETPLACE SHOP DRAWER VIEW */
-        #shop-panel { background: #1e1e24; color: #fff; border-left: 1px solid #2d2d35; display: flex; flex-direction: column; padding: 15px; z-index: 10; height: 100%; overflow-y: auto; }
+        /* 🛒 FIXED SCROLLABLE MARKETPLACE SHOP DRAWER VIEW WITH FULL INTEGRATED CT TRANSFER EXCHANGER */
+        #shop-panel { background: #1e1e24; color: #fff; border-left: 1px solid #2d2d35; display: flex; flex-direction: column; padding: 15px; z-index: 200; height: 100%; overflow: hidden; }
         #shop-panel h3 { color: #ffb300; font-size: 18px; margin-bottom: 12px; border-bottom: 1px solid #2d2d35; padding-bottom: 6px; flex-shrink: 0; }
-        .shop-scroll-content { flex: 1; overflow-y: auto; padding-right: 2px; }
+        .shop-scroll-content { flex: 1; overflow-y: auto; padding-right: 4px; }
         .shop-item-card { background: #2a2a35; border: 1px solid #3e3e4a; border-radius: 8px; padding: 12px; margin-bottom: 12px; display: flex; flex-direction: column; gap: 6px; }
         .shop-item-card h4 { color: #fff; font-size: 14px; display: flex; justify-content: space-between; align-items: center; }
         .shop-item-card p { font-size: 12px; color: #b3b3cc; line-height: 1.4; }
         .shop-buy-btn { background: #ffb300; color: #1e1e24; border: none; padding: 8px; border-radius: 6px; font-weight: bold; font-size: 12px; cursor: pointer; text-align: center; margin-top: 4px; }
         .shop-buy-btn:hover { background: #ffa000; }
+        .shop-section-divider-title { font-size: 11px; text-transform: uppercase; letter-spacing: 0.8px; color: #8f8f9e; margin: 15px 0 8px 0; font-weight: bold; }
 
         /* Directory Log Tracking lists */
         .roster-list { max-height: 150px; overflow-y: auto; font-size: 12px; display: flex; flex-direction: column; gap: 4px; margin-top: 5px; }
@@ -155,7 +173,7 @@
         .dot-online { background: #00e676; }
         .dot-offline { background: #9e9e9e; }
 
-        /* STANDARD MEDIA QUERIES (FOR ACTUAL HARDWARE DISCOVERY) */
+        /* STANDARD MEDIA QUERIES */
         @media (max-width: 768px) {
             #chat-container { grid-template-columns: 1fr !important; }
             #chat-container.show-admin { grid-template-columns: 1fr !important; }
@@ -166,7 +184,7 @@
             #chat-container.view-menu .main-chat-window { display: none !important; }
         }
 
-        /* 📱 HARDWARE FORCED EMULATION TARGET CLASSES (6.1 - 6.9 INCHES CODES) */
+        /* 📱 HARDWARE FORCED EMULATION TARGET CLASSES */
         .forced-phone #chat-container { grid-template-columns: 1fr !important; }
         .forced-phone #chat-container.show-admin { grid-template-columns: 1fr !important; }
         .forced-phone .sidebar { display: none; }
@@ -176,7 +194,7 @@
         .forced-phone #chat-container.view-menu .sidebar { display: flex !important; width: 100% !important; height: 100vh; }
         .forced-phone #chat-container.view-menu .main-chat-window { display: none !important; }
 
-        /* 📟 TABLET OVERRIDE TARGET CONFIGS (8.3 - 13 INCHES CODES) */
+        /* 📟 TABLET OVERRIDE TARGET CONFIGS */
         .forced-tablet #chat-container { grid-template-columns: 280px 1fr !important; }
         .forced-tablet #chat-container.show-admin { grid-template-columns: 240px 1fr 260px !important; }
         .forced-tablet .sidebar { display: flex !important; }
@@ -189,6 +207,35 @@
     <div id="ban-overlay" class="hidden">
         🛑 ACCESS DENIED
         <p>Your account has been permanently banned from this server by the developer administration.</p>
+    </div>
+
+    <div id="profile-panel-modal" class="hidden">
+        <div class="profile-card-container">
+            <div class="profile-card-header">Sovereign Profile Matrix</div>
+            <div class="profile-card-body">
+                <div class="profile-data-row">
+                    <span>Account Identity:</span>
+                    <span id="prof-modal-email">...</span>
+                </div>
+                <div class="profile-data-row">
+                    <span>Hardware Node:</span>
+                    <span id="prof-modal-device">...</span>
+                </div>
+                <div class="profile-data-row">
+                    <span>Clearance Tier:</span>
+                    <span id="prof-modal-tier" style="color: #ffb300; text-transform: uppercase;">...</span>
+                </div>
+                <div class="profile-data-row">
+                    <span>Available Funds:</span>
+                    <span id="prof-modal-tokens" style="color: #008069;">...</span>
+                </div>
+                <div class="profile-data-row">
+                    <span>Daily Media Count:</span>
+                    <span id="prof-modal-quota">...</span>
+                </div>
+                <button class="profile-close-btn" id="profile-modal-close-trigger">Close Profile View</button>
+            </div>
+        </div>
     </div>
 
     <div id="device-modal" class="hidden">
@@ -237,6 +284,7 @@
                 <span id="user-display">Connecting...</span>
                 <span class="token-badge" id="my-token-display">0 CT</span>
                 <div class="header-buttons">
+                    <button id="top-bar-profile-trigger" class="profile-trigger-top-btn">👤 Profile</button>
                     <button id="shop-toggle-btn" class="shop-toggle-btn">🛒 Shop</button>
                     <button id="admin-toggle-btn" class="admin-toggle-btn">Admin 👑</button>
                     <button id="logout-btn" class="logout-btn">Logout</button>
@@ -287,8 +335,9 @@
                     <input type="file" id="file-input" accept="image/*,video/*" style="display:none;">
                 </div>
                 <div class="ct-transfer-subcontainer">
-                    <span style="font-size:12px; font-weight:bold; color:#54656f;">💸 Gift Tokens:</span>
-                    <input type="number" id="tray-transfer-amount" placeholder="CT Amount" style="width: 90px;">
+                    <span>💸 Gift CT:</span>
+                    <input type="text" id="tray-transfer-recipient" placeholder="Recipient's Email Address">
+                    <input type="number" id="tray-transfer-amount" placeholder="Amount">
                     <button id="tray-transfer-send-btn">Send Transfer</button>
                 </div>
             </div>
@@ -324,6 +373,19 @@
                     <h4><span>🛡️ Vanguard Elite Armor</span> <b style="color:#ffb300;">300 CT / year</b></h4>
                     <p>Unlocks complete server network profile cloaking! Hides your hardware device and target room activity states entirely from regular user panels.</p>
                     <button class="shop-buy-btn" data-buy="vanguard">Acquire Vanguard License</button>
+                </div>
+
+                <div class="shop-section-divider-title">P2P Financial Terminal</div>
+                <div class="shop-item-card" style="border-color: #ffb300; background: #23232c;">
+                    <h4 style="color: #ffb300;">Execute Peer-to-Peer CT Transfer</h4>
+                    <p>Transmit an instant token payload directly to another user's balance ledger registry link.</p>
+                    <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 8px;">
+                        <input type="text" id="shop-transfer-target" placeholder="Recipient's Exact Email Address" style="width: 100%; padding: 10px; border: 1px solid #3e3e4a; background: #1a1a22; border-radius: 6px; color: #fff; font-size: 13px; outline: none;">
+                        <div style="display: flex; gap: 8px;">
+                            <input type="number" id="shop-transfer-amount" placeholder="CT Amount" style="flex: 1; padding: 10px; border: 1px solid #3e3e4a; background: #1a1a22; border-radius: 6px; color: #fff; font-size: 13px; outline: none;">
+                            <button id="shop-transfer-execute-btn" style="background: #ffb300; color: #1e1e24; border: none; padding: 0 16px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 13px;">Transfer CT</button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -451,17 +513,51 @@
         const callPanelInterface = document.getElementById("call-panel-interface");
         const callStatusText = document.getElementById("call-status-text");
 
-        // Action drawer variables & elements
+        // Profile Panel UI Bindings
+        const profilePanelModal = document.getElementById("profile-panel-modal");
+        const topBarProfileTrigger = document.getElementById("top-bar-profile-trigger");
+        const profileModalCloseTrigger = document.getElementById("profile-modal-close-trigger");
+        const profModalEmail = document.getElementById("prof-modal-email");
+        const profModalDevice = document.getElementById("prof-modal-device");
+        const profModalTier = document.getElementById("prof-modal-tier");
+        const profModalTokens = document.getElementById("prof-modal-tokens");
+        const profModalQuota = document.getElementById("prof-modal-quota");
+
+        // Action drawer elements
         const actionUtilityDrawer = document.getElementById("action-utility-drawer");
         const trayTogglePlusBtn = document.getElementById("tray-toggle-plus-btn");
         const trayTriggerCall = document.getElementById("tray-trigger-call");
+        const trayTransferRecipient = document.getElementById("tray-transfer-recipient");
         const trayTransferAmount = document.getElementById("tray-transfer-amount");
         const trayTransferSendBtn = document.getElementById("tray-transfer-send-btn");
+
+        // In-Shop Internal P2P Elements
+        const shopTransferTarget = document.getElementById("shop-transfer-target");
+        const shopTransferAmount = document.getElementById("shop-transfer-amount");
+        const shopTransferExecuteBtn = document.getElementById("shop-transfer-execute-btn");
 
         function isAdmin(email) {
             if (!email) return false;
             return ADMIN_GMAILS.map(e => e.toLowerCase()).includes(email.toLowerCase());
         }
+
+        // PROFILE SYSTEM LOGIC ENGINE
+        topBarProfileTrigger.addEventListener("click", () => {
+            if(!userProfileData.email) return;
+            profModalEmail.innerText = userProfileData.email;
+            profModalDevice.innerText = userProfileData.device || "Unknown Node";
+            profModalTier.innerText = userProfileData.tier || "standard";
+            profModalTokens.innerText = userProfileData.tokens === "inf" ? "♾️ Infinite Tokens" : `${userProfileData.tokens} CT`;
+            
+            const maxAllowed = (userProfileData.tier === "business" || userProfileData.tier === "vanguard") ? "♾️" : (userProfileData.tier === "pro" ? 50 : 30);
+            profModalQuota.innerText = `${userProfileData.mediaCount || 0} / ${maxAllowed} Uploads used`;
+            
+            profilePanelModal.classList.remove("hidden");
+        });
+
+        profileModalCloseTrigger.addEventListener("click", () => {
+            profilePanelModal.classList.add("hidden");
+        });
 
         // TRAY TOGGLE SYSTEM ENGINE
         trayTogglePlusBtn.addEventListener("click", () => {
@@ -513,6 +609,7 @@
                         authContainer.classList.add("hidden");
                         chatContainer.classList.add("hidden");
                         deviceModal.classList.add("hidden");
+                        profilePanelModal.classList.add("hidden");
                         banOverlay.classList.remove("hidden");
                         await signOut(auth);
                         return;
@@ -528,6 +625,7 @@
                 adminPanel.classList.add("hidden");
                 shopPanel.classList.add("hidden");
                 deviceModal.classList.add("hidden");
+                profilePanelModal.classList.add("hidden");
                 document.body.className = "";
                 adminToggleBtn.style.display = "none";
                 if (unsubscribeChat) unsubscribeChat();
@@ -719,6 +817,9 @@
             activeChatEmailLabel = target;
             currentChattingWith.innerText = `💬 Target Workspace Feed: ${target}`;
             headerReportTrigger.style.display = "inline-block";
+
+            // Populate the input bar inside the action tray drawer automatically for extra comfort
+            trayTransferRecipient.value = target;
             
             const lexArray = [currentUser.email.toLowerCase(), target].sort();
             activeRoomId = `${lexArray[0]}_to_${lexArray[1]}`.replace(/\./g, "_");
@@ -773,16 +874,16 @@
             trayTogglePlusBtn.innerText = "+";
         };
 
-        // P2P TOKEN TRANSACTIONS TERMINAL CORE
-        trayTransferSendBtn.onclick = async () => {
-            if (isGroupChatMode) return alert("Direct transaction mapping requires an isolated, non-group room channel context.");
-            if (!activeRoomId || !activeChatEmailLabel) return alert("Establish communication channels before executing trade logic.");
-            
-            const amountToGive = parseInt(trayTransferAmount.value);
+        // SHARED SYSTEM TRANSFER TRANSACTION ENGINE EXECUTOR
+        async function executeTokenTransfer(targetReceiverEmail, rawAmountStr, contextCode) {
+            const amountToGive = parseInt(rawAmountStr);
+            if (!targetReceiverEmail) return alert("Please enter the recipient user email address coordinate mapping.");
             if (isNaN(amountToGive) || amountToGive <= 0) return alert("Specify valid token arithmetic integers.");
 
             const myCleanEmail = currentUser.email.toLowerCase();
-            const counterPartyEmail = activeChatEmailLabel.toLowerCase();
+            const counterPartyEmail = targetReceiverEmail.toLowerCase().trim();
+
+            if (myCleanEmail === counterPartyEmail) return alert("Transaction Aborted: Cannot send assets to your own self-node.");
 
             if (userProfileData.tokens !== "inf" && parseInt(userProfileData.tokens) < amountToGive) {
                 return alert("Transaction Terminated: Insufficient balance available.");
@@ -792,13 +893,15 @@
             const receiverDocRef = doc(db, "presence", counterPartyEmail.replace(/\./g, "_"));
 
             try {
+                // Verify recipient account exists
+                const receiverCheck = await getDoc(receiverDocRef);
+                if (!receiverCheck.exists()) {
+                    return alert("Transaction Denied: Recipient profile email node does not exist inside system directories.");
+                }
+
                 await runTransaction(db, async (transaction) => {
                     const senderSnap = await transaction.get(senderDocRef);
                     const receiverSnap = await transaction.get(receiverDocRef);
-
-                    if (!senderSnap.exists() || !receiverSnap.exists()) {
-                        throw "One of the profile endpoints is missing from core indexes.";
-                    }
 
                     const sTokens = senderSnap.data().tokens;
                     const rTokens = receiverSnap.data().tokens !== undefined ? receiverSnap.data().tokens : 0;
@@ -811,22 +914,44 @@
                     }
                 });
 
-                // Inject secure ledger system message update tracking proof
+                // Inject secure ledger system message update tracking proof if a room context exists
+                let derivedRoomId = activeRoomId;
+                if (!derivedRoomId) {
+                    const lexArray = [myCleanEmail, counterPartyEmail].sort();
+                    derivedRoomId = `${lexArray[0]}_to_${lexArray[1]}`.replace(/\./g, "_");
+                }
+
                 await addDoc(collection(db, "secure_messages"), {
-                    roomId: activeRoomId,
+                    roomId: derivedRoomId,
                     sender: "SYSTEM_LEDGER",
                     senderName: "System Bank",
                     message: `💸 TRANSACTION LOG: ${currentUser.email} transferred ${amountToGive} CT to ${counterPartyEmail}.`,
                     timestamp: serverTimestamp()
                 });
 
-                trayTransferAmount.value = "";
-                actionUtilityDrawer.style.display = "none";
-                trayTogglePlusBtn.innerText = "+";
-                alert(`Transaction ledger logged successfully. Gilted ${amountToGive} CT cleanly.`);
+                alert(`Transaction ledger logged successfully. Transferred ${amountToGive} CT cleanly to ${counterPartyEmail}.`);
+                
+                if (contextCode === "shop") {
+                    shopTransferTarget.value = "";
+                    shopTransferAmount.value = "";
+                } else {
+                    trayTransferAmount.value = "";
+                    actionUtilityDrawer.style.display = "none";
+                    trayTogglePlusBtn.innerText = "+";
+                }
             } catch (error) {
                 alert(`Financial validation loop error: ${error}`);
             }
+        }
+
+        // Action Sub-Tray Send Controls
+        trayTransferSendBtn.onclick = () => {
+            executeTokenTransfer(trayTransferRecipient.value, trayTransferAmount.value, "tray");
+        };
+
+        // Shop Sub-Tray Send Controls
+        shopTransferExecuteBtn.onclick = () => {
+            executeTokenTransfer(shopTransferTarget.value, shopTransferAmount.value, "shop");
         };
 
         document.getElementById("call-btn-rec").onclick = async () => {
