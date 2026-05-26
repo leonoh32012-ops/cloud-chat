@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Cloud Chat</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background-color: #e5ddd5; height: 100vh; display: flex; justify-content: center; align-items: center; }
+        #auth-container, #chat-container { background: white; width: 400px; height: 600px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); display: flex; flex-direction: column; overflow: hidden; }
+        .hidden { display: none !important; }
+        
+        /* Auth Styles */
+        .auth-box { padding: 30px; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; text-align: center; }
+        .auth-box h2 { margin-bottom: 10px; color: #075e54; }
+        .auth-box p { color: #666; margin-bottom: 30px; }
+        .google-btn { display: flex; align-items: center; gap: 10px; padding: 12px 24px; background: white; color: #757575; border: 1px solid #ddd; border-radius: 5px; cursor: pointer; font-size: 16px; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: background 0.2s; }
+        .google-btn:hover { background: #f7f7f7; }
+        .google-icon { width: 20px; height: 20px; }
+
+        /* Chat Styles */
+        .chat-header { background: #075e54; color: white; padding: 15px; display: flex; justify-content: space-between; align-items: center; }
+        .chat-header button { background: transparent; color: white; border: 1px solid white; padding: 5px 10px; border-radius: 3px; cursor: pointer; }
+        #search-box { padding: 10px; background: #f6f6f6; border-bottom: 1px solid #ddd; display: flex; gap: 5px; }
+        #search-box input { flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+        #search-box button { background: #128c7e; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; }
+        
+        #chat-box { flex: 1; padding: 15px; overflow-y: auto; background: #efeae2; display: flex; flex-direction: column; gap: 10px; }
+        .msg { padding: 8px 12px; border-radius: 8px; max-width: 75%; position: relative; font-size: 15px; word-break: break-word; display: flex; flex-direction: column; }
+        .msg.sent { background: #d9fdd3; align-self: flex-end; }
+        .msg.received { background: white; align-self: flex-start; }
+        .msg img, .msg video { max-width: 100%; border-radius: 5px; margin-top: 5px; }
+        .time { font-size: 10px; color: #777; align-self: flex-end; margin-top: 4px; }
+
+        .input-area { padding: 10px; background: #f0f0f0; display: flex; align-items: center; gap: 8px; }
+        .input-area input[type="text"] { flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 20px; outline: none; }
+        .input-area button { background: #128c7e; color: white; border: none; padding: 10px 16px; border-radius: 50%; cursor: pointer; font-weight: bold; }
+        .file-label { cursor: pointer; font-size: 20px; color: #555; padding: 5px; }
+        #file-input { display: none; }
+    </style>
+</head>
+<body>
+
+    <div id="auth-container">
+        <div class="auth-box">
+            <h2>Welcome to Cloud Chat</h2>
+            <p>Connect instantly and securely using your Google Account.</p>
+            <button class="google-btn" id="google-login-btn">
+                <img class="google-icon" src="https://fonts.gstatic.com/s/i/productlogos/googleg/v6/web-24dp/logo_googleg_color_24dp.png" alt="Google Logo">
+                Sign in with Google
+            </button>
+        </div>
+    </div>
+
+    <div id="chat-container" class="hidden">
+        <div class="chat-header">
+            <span id="user-display">Logged in as...</span>
+            <button id="logout-btn">Logout</button>
+        </div>
+        <div id="search-box">
+            <input type="text" id="target-user-input" placeholder="Enter Friend's Gmail to Chat...">
+            <button id="start-chat-btn">Connect</button>
+        </div>
+        <h4 id="current-chatting-with" style="margin: 5px 15px; color: #555; font-size: 13px;">No active chat selected</h4>
+        <div id="chat-box"></div>
+        <div class="input-area">
+            <label for="file-input" class="file-label">📁</label>
+            <input type="file" id="file-input" accept="image/*,video/*">
+            <input type="text" id="message-input" placeholder="Type a message...">
+            <button id="send-btn">➔</button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
+
+        // Your Config
+        const firebaseConfig = {
+            apiKey: "AIzaSyBOMhYlrzoSgabnphKfZuT8YW52ZkeL9Os",
+            authDomain: "temu-rng-game.firebaseapp.com",
+            projectId: "temu-rng-game",
+            storageBucket: "temu-rng-game.firebasestorage.app",
+            messagingSenderId: "1071975079565",
+            appId: "1:1071975079565:web:76e9909deba992e7f90cc4",
+            measurementId: "G-K5KR1REEZK"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const storage = getStorage(app);
+        const googleProvider = new GoogleAuthProvider();
+
+        // Global States
+        let currentUser = null;
+        let activeChatEmail = "";
+        let unsubscribeChat = null;
+
+        // UI Elements
+        const authContainer = document.getElementById("auth-container");
+        const chatContainer = document.getElementById("chat-container");
+        const googleLoginBtn = document.getElementById("google-login-btn");
+        const userDisplay = document.getElementById("user-display");
+        const chatBox = document.getElementById("chat-box");
+        const messageInput = document.getElementById("message-input");
+        const fileInput = document.getElementById("file-input");
+        const sendBtn = document.getElementById("send-btn");
+        const targetUserInput = document.getElementById("target-user-input");
+        const startChatBtn = document.getElementById("start-chat-btn");
+        const currentChattingWith = document.getElementById("current-chatting-with");
+
+        // Trigger Google Login Popup
+        googleLoginBtn.addEventListener("click", async () => {
+            try {
+                await signInWithPopup(auth, googleProvider);
+            } catch (err) {
+                alert("Login Error: " + err.message);
+            }
+        });
+
+        // Logout
+        document.getElementById("logout-btn").addEventListener("click", () => signOut(auth));
+
+        // Manage User Login State
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                currentUser = user;
+                authContainer.classList.add("hidden");
+                chatContainer.classList.remove("hidden");
+                userDisplay.innerText = `👋 ${user.displayName}`;
+            } else {
+                currentUser = null;
+                authContainer.classList.remove("hidden");
+                chatContainer.classList.add("hidden");
+                if(unsubscribeChat) unsubscribeChat();
+            }
+        });
+
+        // Connect with a friend using their Google Email
+        startChatBtn.addEventListener("click", () => {
+            const target = targetUserInput.value.trim().toLowerCase();
+            if(!target) return alert("Please type your friend's Gmail address");
+            if(target === currentUser.email.toLowerCase()) return alert("You cannot chat with yourself!");
+            
+            activeChatEmail = target;
+            currentChattingWith.innerText = `Chatting with: ${activeChatEmail}`;
+            loadMessages();
+        });
+
+        // Send Message Handler
+        async function sendChatMessage() {
+            if(!activeChatEmail) return alert("Please connect with a friend's Gmail before texting!");
+            const text = messageInput.value.trim();
+            const file = fileInput.files[0];
+            
+            if (!text && !file) return;
+
+            let fileUrl = "";
+            let fileType = "";
+
+            messageInput.value = ""; 
+            fileInput.value = "";
+
+            if (file) {
+                try {
+                    const storageRef = ref(storage, `chats/${Date.now()}_${file.name}`);
+                    const uploadTask = await uploadBytes(storageRef, file);
+                    fileUrl = await getDownloadURL(uploadTask.ref);
+                    fileType = file.type.startsWith("image/") ? "image" : "video";
+                } catch (e) {
+                    console.error("Upload failed", e);
+                    return alert("Failed to attach media.");
+                }
+            }
+
+            try {
+                await addDoc(collection(db, "secure_messages"), {
+                    sender: currentUser.email.toLowerCase(),
+                    receiver: activeChatEmail,
+                    message: text,
+                    fileUrl: fileUrl,
+                    fileType: fileType,
+                    timestamp: serverTimestamp()
+                });
+            } catch (e) {
+                console.error("Database storage failed", e);
+            }
+        }
+
+        sendBtn.addEventListener("click", sendChatMessage);
+        messageInput.addEventListener("keypress", (e) => { if(e.key === 'Enter') sendChatMessage(); });
+
+        // Load targeted private chat data stream
+        function loadMessages() {
+            if (unsubscribeChat) unsubscribeChat();
+
+            const myEmail = currentUser.email.toLowerCase();
+            const friendEmail = activeChatEmail;
+
+            const q = query(collection(db, "secure_messages"), orderBy("timestamp", "asc"));
+
+            unsubscribeChat = onSnapshot(q, (snapshot) => {
+                chatBox.innerHTML = "";
+                snapshot.forEach((doc) => {
+                    const data = doc.data();
+                    
+                    const isMyMessageToFriend = (data.sender === myEmail && data.receiver === friendEmail);
+                    const isFriendMessageToMe = (data.sender === friendEmail && data.receiver === myEmail);
+
+                    if (isMyMessageToFriend || isFriendMessageToMe) {
+                        const msgDiv = document.createElement("div");
+                        msgDiv.classList.add("msg", data.sender === myEmail ? "sent" : "received");
+
+                        if(data.message) {
+                            const textSpan = document.createElement("span");
+                            textSpan.innerText = data.message;
+                            msgDiv.appendChild(textSpan);
+                        }
+
+                        if (data.fileUrl) {
+                            if (data.fileType === "image") {
+                                const img = document.createElement("img");
+                                img.src = data.fileUrl;
+                                msgDiv.appendChild(img);
+                            } else if (data.fileType === "video") {
+                                const vid = document.createElement("video");
+                                vid.src = data.fileUrl;
+                                vid.controls = true;
+                                msgDiv.appendChild(vid);
+                            }
+                        }
+
+                        const timeSpan = document.createElement("span");
+                        timeSpan.classList.add("time");
+                        if (data.timestamp) {
+                            const date = data.timestamp.toDate();
+                            timeSpan.innerText = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                        } else {
+                            timeSpan.innerText = "Sending...";
+                        }
+                        msgDiv.appendChild(timeSpan);
+
+                        chatBox.appendChild(msgDiv);
+                    }
+                });
+                chatBox.scrollTop = chatBox.scrollHeight;
+            });
+        }
+    </script>
+</body>
+</html>
