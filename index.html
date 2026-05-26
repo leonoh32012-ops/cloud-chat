@@ -71,6 +71,7 @@
         .header-actions-wrapper { display: flex; gap: 8px; align-items: center; }
         .report-incident-btn { background: #e07a5f; color: white; border: none; padding: 6px 12px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer; display: none; }
         .call-trigger-btn { background: #25d366; color: white; border: none; padding: 8px 14px; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer; display: none; }
+        .back-nav-btn { background: #54656f; color: white; border: none; padding: 6px 12px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer; display: none; }
         
         /* Calling elements panel */
         #call-panel-interface { background: #111b21; color: white; padding: 12px 25px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #25d366; z-index: 5; font-size: 13px; }
@@ -141,12 +142,33 @@
         .dot-online { background: #00e676; }
         .dot-offline { background: #9e9e9e; }
 
+        /* STANDARD MEDIA QUERIES (FOR ACTUAL HARDWARE DISCOVERY) */
         @media (max-width: 768px) {
-            #chat-container { grid-template-columns: 1fr; }
-            #chat-container.show-admin { grid-template-columns: 1fr; }
-            .admin-panel, #shop-panel { position: fixed; right: 0; top: 0; height: 100vh; width: 290px; }
+            #chat-container { grid-template-columns: 1fr !important; }
+            #chat-container.show-admin { grid-template-columns: 1fr !important; }
+            .admin-panel, #shop-panel { position: fixed; right: 0; top: 0; height: 100vh; width: 100% !important; z-index: 500; }
             .sidebar { display: none; }
+            .back-nav-btn { display: inline-block !important; }
+            #chat-container.view-menu .sidebar { display: flex !important; width: 100% !important; }
+            #chat-container.view-menu .main-chat-window { display: none !important; }
         }
+
+        /* 📱 HARDWARE FORCED EMULATION TARGET CLASSES (6.1 - 6.9 INCHES CODES) */
+        .forced-phone #chat-container { grid-template-columns: 1fr !important; }
+        .forced-phone #chat-container.show-admin { grid-template-columns: 1fr !important; }
+        .forced-phone .sidebar { display: none; }
+        .forced-phone .back-nav-btn { display: inline-block !important; }
+        .forced-phone .admin-panel, .forced-phone #shop-panel { position: fixed; right: 0; top: 0; height: 100vh; width: 100% !important; z-index: 500; }
+        
+        .forced-phone #chat-container.view-menu .sidebar { display: flex !important; width: 100% !important; height: 100vh; }
+        .forced-phone #chat-container.view-menu .main-chat-window { display: none !important; }
+
+        /* 📟 TABLET OVERRIDE TARGET CONFIGS (8.3 - 13 INCHES CODES) */
+        .forced-tablet #chat-container { grid-template-columns: 280px 1fr !important; }
+        .forced-tablet #chat-container.show-admin { grid-template-columns: 240px 1fr 260px !important; }
+        .forced-tablet .sidebar { display: flex !important; }
+        .forced-tablet .back-nav-btn { display: none !important; }
+        .forced-tablet .admin-panel, .forced-tablet #shop-panel { position: relative; width: auto !important; height: auto; }
     </style>
 </head>
 <body>
@@ -236,6 +258,7 @@
             </div>
             
             <div class="main-header">
+                <button id="header-back-nav" class="back-nav-btn">⬅️ Rooms</button>
                 <span id="current-chatting-with">Select an active workspace channel pipeline from the sidebar</span>
                 <div class="header-actions-wrapper">
                     <button id="header-report-trigger" class="report-incident-btn">⚠️ Report Channel</button>
@@ -254,7 +277,7 @@
         </div>
 
         <div id="shop-panel" class="hidden">
-            <h3>Cloud Token Store 🛒</h3>
+            <h3>Cloud Token Store 🛒 <button class="back-nav-btn" style="float:right;" onclick="document.getElementById('shop-panel').classList.add('hidden')">✕ Close</button></h3>
             <div style="margin-bottom: 12px; font-size: 13px; color: #ffb300; font-weight: bold;">Earn +10 CT every single day automatically on rollover log!</div>
             
             <div class="shop-item-card">
@@ -277,7 +300,7 @@
         </div>
 
         <div id="admin-panel" class="admin-panel hidden">
-            <h3>Admin Space 👑</h3>
+            <h3>Admin Space 👑 <button class="back-nav-btn" style="float:right; background:#ea0038;" onclick="document.getElementById('admin-panel').classList.add('hidden'); document.getElementById('chat-container').classList.remove('show-admin');">✕ Close</button></h3>
             
             <div class="admin-sec">
                 <h4>User Deep Inspection Matrix</h4>
@@ -391,6 +414,7 @@
         const adminToggleBtn = document.getElementById("admin-toggle-btn");
         const shopToggleBtn = document.getElementById("shop-toggle-btn");
         const sidebarRoomsDeck = document.getElementById("sidebar-rooms-deck");
+        const headerBackNav = document.getElementById("header-back-nav");
         
         const accountTierIndicator = document.getElementById("account-tier-indicator");
         const mediaQuotaIndicator = document.getElementById("media-quota-indicator");
@@ -417,6 +441,11 @@
             if (!email) return false;
             return ADMIN_GMAILS.map(e => e.toLowerCase()).includes(email.toLowerCase());
         }
+
+        // MOBILE NAV OVERRIDES
+        headerBackNav.addEventListener("click", () => {
+            chatContainer.classList.add("view-menu");
+        });
 
         adminToggleBtn.addEventListener("click", () => {
             shopPanel.classList.add("hidden");
@@ -466,6 +495,7 @@
                 adminPanel.classList.add("hidden");
                 shopPanel.classList.add("hidden");
                 deviceModal.classList.add("hidden");
+                document.body.className = "";
                 adminToggleBtn.style.display = "none";
                 if (unsubscribeChat) unsubscribeChat();
             }
@@ -476,6 +506,19 @@
                 const chosenDevice = btn.getAttribute("data-device");
                 deviceModal.classList.add("hidden");
                 chatContainer.classList.remove("hidden");
+
+                // HARDWARE SCREEN VIEW EMULATOR CONTROLLER BLOCK
+                document.body.className = ""; 
+                chatContainer.classList.add("view-menu"); 
+                
+                if (chosenDevice === "iPhone" || chosenDevice === "Android Mobile") {
+                    document.body.classList.add("forced-phone");
+                } else if (chosenDevice === "Tablet / iPad") {
+                    document.body.classList.add("forced-tablet");
+                    chatContainer.classList.remove("view-menu");
+                } else {
+                    chatContainer.classList.remove("view-menu");
+                }
 
                 const emailClean = currentUser.email.toLowerCase();
                 const keyId = emailClean.replace(/\./g, "_");
@@ -600,6 +643,7 @@
                                 currentChattingWith.innerText = `👥 Group Channel: ${gData.title}`;
                                 headerCallTrigger.style.display = "inline-block";
                                 headerReportTrigger.style.display = "inline-block";
+                                chatContainer.classList.remove("view-menu");
                                 loadMessages();
                             };
                             sidebarRoomsDeck.appendChild(gItem);
@@ -649,6 +693,7 @@
             const lexArray = [currentUser.email.toLowerCase(), target].sort();
             activeRoomId = `${lexArray[0]}_to_${lexArray[1]}`.replace(/\./g, "_");
 
+            chatContainer.classList.remove("view-menu");
             loadMessages();
             listenToCallsSignalingChannel();
         }
