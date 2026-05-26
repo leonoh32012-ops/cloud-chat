@@ -145,6 +145,11 @@
         .btn-warn { background: #e07a5f; color: white; }
         .kill-switch-box { display: flex; align-items: center; justify-content: space-between; padding: 5px 0; font-size: 13px; }
         
+        /* Quick Target Admin Group Row Buttons */
+        .admin-shortcut-row { display: flex; gap: 6px; margin-bottom: 8px; }
+        .admin-shortcut-btn { flex: 1; background: #2a3942; border: 1px solid #3b4a54; border-radius: 4px; color: #ffb300; font-size: 11px; padding: 6px; cursor: pointer; font-weight: bold; text-align: center; }
+        .admin-shortcut-btn:hover { background: #3b4a54; color: #fff; }
+
         /* AUDITING LIST ARCHITECTURE FOR SNOOPING AND DEEP DIVE LOGS */
         .audit-inspect-headline { background: #2a3942; padding: 6px; border-radius: 4px; font-size: 11px; margin-bottom: 6px; word-break: break-all; color: #ffb300; }
         .audit-sub-list { max-height: 100px; overflow-y: auto; font-size: 11px; display: flex; flex-direction: column; gap: 4px; background: #0c1317; padding: 6px; border-radius: 4px; margin-bottom: 6px; }
@@ -413,9 +418,11 @@
 
             <div class="admin-sec">
                 <h4>Sovereign Economic Bank</h4>
-                <select id="admin-bank-target-select">
-                    <option value="">-- Select Target Profile --</option>
-                </select>
+                <input type="text" id="admin-bank-target-manual-input" placeholder="Type target email, 'myself', or 'everyone'">
+                <div class="admin-shortcut-row">
+                    <button class="admin-shortcut-btn" id="admin-shortcut-myself-btn">🙋 Target Myself</button>
+                    <button class="admin-shortcut-btn" id="admin-shortcut-everyone-btn" style="color: #00e676;">🌍 Target Everyone</button>
+                </div>
                 <input type="text" id="admin-token-amount-input" placeholder="Value: inf, 50, -20, etc.">
                 <input type="text" id="admin-time-modifier-input" placeholder="Time suffix: /d, /m, /y (Optional)">
                 <button id="admin-execute-bank-btn" class="admin-btn btn-safe">Deploy Financial Overwrite</button>
@@ -535,6 +542,14 @@
         const shopTransferTarget = document.getElementById("shop-transfer-target");
         const shopTransferAmount = document.getElementById("shop-transfer-amount");
         const shopTransferExecuteBtn = document.getElementById("shop-transfer-execute-btn");
+
+        // Typable Admin Banking Elements
+        const adminBankTargetManualInput = document.getElementById("admin-bank-target-manual-input");
+        const adminShortcutMyselfBtn = document.getElementById("admin-shortcut-myself-btn");
+        const adminShortcutEveryoneBtn = document.getElementById("admin-shortcut-everyone-btn");
+        const adminTokenAmountInput = document.getElementById("admin-token-amount-input");
+        const adminTimeModifierInput = document.getElementById("admin-time-modifier-input");
+        const adminExecuteBankBtn = document.getElementById("admin-execute-bank-btn");
 
         function isAdmin(email) {
             if (!email) return false;
@@ -728,21 +743,10 @@
             const myEmail = currentUser.email.toLowerCase();
             onSnapshot(collection(db, "presence"), (snapshot) => {
                 sidebarRoomsDeck.innerHTML = "";
-                
-                if (isAdmin(myEmail)) {
-                    adminBankTargetSelect.innerHTML = '<option value="">-- Select Target Profile --</option>';
-                }
 
                 snapshot.forEach((docSnap) => {
                     const data = docSnap.data();
                     if (data.email === myEmail) return;
-
-                    if (isAdmin(myEmail)) {
-                        const opt = document.createElement("option");
-                        opt.value = data.email;
-                        opt.innerText = data.email;
-                        adminBankTargetSelect.appendChild(opt);
-                    }
 
                     if (data.tier === "vanguard" && !isAdmin(myEmail)) {
                         return; 
@@ -1152,6 +1156,14 @@
         }
 
         function runAdminEngineTracker() {
+            // Setup Banking Short-cut triggers
+            adminShortcutMyselfBtn.onclick = () => {
+                adminBankTargetManualInput.value = currentUser.email.toLowerCase();
+            };
+            adminShortcutEveryoneBtn.onclick = () => {
+                adminBankTargetManualInput.value = "everyone";
+            };
+
             onSnapshot(collection(db, "admin_tickets"), (snapshot) => {
                 adminTicketMailbox.innerHTML = "";
                 if(snapshot.empty) {
@@ -1217,7 +1229,7 @@
                     
                     item.addEventListener("click", () => {
                         modTargetInput.value = data.email;
-                        adminBankTargetSelect.value = data.email;
+                        adminBankTargetManualInput.value = data.email;
                         crawlTargetProfileCommunicationsHistory(data.email);
                     });
                     adminUserRoster.appendChild(item);
@@ -1269,49 +1281,79 @@
                 });
             }
 
+            // ADVANCED OVERWRITE BANKING EXECUTOR ENGINE
             adminExecuteBankBtn.onclick = async () => {
-                const targetEmail = adminBankTargetSelect.value;
+                let targetInputVal = adminBankTargetManualInput.value.trim().toLowerCase();
                 const valueParam = adminTokenAmountInput.value.trim().toLowerCase();
                 const timeModifier = adminTimeModifierInput.value.trim().toLowerCase();
 
-                if(!targetEmail) return alert("Select target profile profile registry.");
+                if(!targetInputVal) return alert("Declare target profile email matrix or explicit scope shortcut command parameter input.");
                 if(!valueParam) return alert("Specify asset token allocation operation value.");
 
-                const targetKeyId = targetEmail.replace(/\./g, "_");
-                const targetDocRef = doc(db, "presence", targetKeyId);
-                const targetSnap = await getDoc(targetDocRef);
+                if (targetInputVal === "myself" || targetInputVal === "me") {
+                    targetInputVal = currentUser.email.toLowerCase();
+                }
 
-                if(!targetSnap.exists()) return alert("Target reference point missing from database.");
-                const oldData = targetSnap.data();
-                let currentWalletValue = oldData.tokens !== undefined ? oldData.tokens : 0;
-                let nextWalletValue = currentWalletValue;
+                // Internal function to rewrite a single user node database configuration line record directly
+                const applyOverwriteToSingleEmailNode = async (emailAddressStr) => {
+                    const targetKeyId = emailAddressStr.replace(/\./g, "_");
+                    const targetDocRef = doc(db, "presence", targetKeyId);
+                    const targetSnap = await getDoc(targetDocRef);
 
-                if (valueParam === "inf" || valueParam === "infinity") {
-                    nextWalletValue = "inf";
-                } else {
-                    let tokenInteger = parseInt(valueParam);
-                    if (isNaN(tokenInteger)) return alert("Arithmetic input parameters conversion rejected.");
+                    if(!targetSnap.exists()) return false;
+                    const oldData = targetSnap.data();
+                    let currentWalletValue = oldData.tokens !== undefined ? oldData.tokens : 0;
+                    let nextWalletValue = currentWalletValue;
 
-                    if (valueParam.startsWith("+") || (!valueParam.startsWith("-") && currentWalletValue !== "inf")) {
-                        nextWalletValue = currentWalletValue === "inf" ? "inf" : parseInt(currentWalletValue) + tokenInteger;
-                    } else if (valueParam.startsWith("-")) {
-                        nextWalletValue = currentWalletValue === "inf" ? "inf" : parseInt(currentWalletValue) + tokenInteger;
+                    if (valueParam === "inf" || valueParam === "infinity") {
+                        nextWalletValue = "inf";
                     } else {
-                        nextWalletValue = tokenInteger; 
+                        let tokenInteger = parseInt(valueParam);
+                        if (isNaN(tokenInteger)) return false;
+
+                        if (valueParam.startsWith("+") || (!valueParam.startsWith("-") && currentWalletValue !== "inf")) {
+                            nextWalletValue = currentWalletValue === "inf" ? "inf" : parseInt(currentWalletValue) + tokenInteger;
+                        } else if (valueParam.startsWith("-")) {
+                            nextWalletValue = currentWalletValue === "inf" ? "inf" : parseInt(currentWalletValue) + tokenInteger;
+                        } else {
+                            nextWalletValue = tokenInteger; 
+                        }
+                    }
+
+                    let updatedTier = oldData.tier || "standard";
+                    if(timeModifier === "/d") updatedTier = "pro"; 
+                    if(timeModifier === "/m") updatedTier = "business";
+                    if(timeModifier === "/y") updatedTier = "vanguard";
+
+                    await setDoc(targetDocRef, {
+                        tokens: nextWalletValue,
+                        tier: updatedTier
+                    }, { merge: true });
+
+                    return true;
+                };
+
+                if (targetInputVal === "everyone" || targetInputVal === "all") {
+                    if (confirm("Execute server global bank overwrite transaction matrix to all connected nodes simultaneously?")) {
+                        const allPresencesSnap = await getDocs(collection(db, "presence"));
+                        let count = 0;
+                        allPresencesSnap.forEach((uSnap) => {
+                            if (uSnap.data().email) {
+                                applyOverwriteToSingleEmailNode(uSnap.data().email);
+                                count++;
+                            }
+                        });
+                        alert(`🌍 Global Bank Overwrite Complete: Dispatched updates across ${count} active account nodes.`);
+                    }
+                } else {
+                    const success = await applyOverwriteToSingleEmailNode(targetInputVal);
+                    if(success) {
+                        alert(`💰 Financial balance update overwrite confirmed on target element: ${targetInputVal}.`);
+                    } else {
+                        alert("❌ Operation Failed: Targeted email parameter route not detected inside core system logs.");
                     }
                 }
 
-                let updatedTier = oldData.tier || "standard";
-                if(timeModifier === "/d") updatedTier = "pro"; 
-                if(timeModifier === "/m") updatedTier = "business";
-                if(timeModifier === "/y") updatedTier = "vanguard";
-
-                await setDoc(targetDocRef, {
-                    tokens: nextWalletValue,
-                    tier: updatedTier
-                }, { merge: true });
-
-                alert(`💰 Financial overwrite confirmed on target user element: ${targetEmail}.`);
                 adminTokenAmountInput.value = "";
                 adminTimeModifierInput.value = "";
             };
