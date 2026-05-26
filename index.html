@@ -82,7 +82,8 @@
         
         /* Directory Log Tracking lists */
         .roster-list { max-height: 120px; overflow-y: auto; font-size: 12px; display: flex; flex-direction: column; gap: 4px; margin-top: 5px; }
-        .roster-item { background: #202c33; padding: 6px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; }
+        .roster-item { background: #202c33; padding: 6px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+        .roster-item:hover { background: #2a3942; }
         .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
         .dot-online { background: #00e676; }
         .dot-offline { background: #9e9e9e; }
@@ -98,7 +99,7 @@
     <div id="auth-container">
         <div class="auth-box">
             <h2>Cloud Chat Platform</h2>
-            <p>Connect instantly with real-time encrypted data processing.</p>
+            <p>Connect instantly with real-time data processing.</p>
             <button class="google-btn" id="google-login-btn">
                 <img class="google-icon" src="https://fonts.gstatic.com/s/i/productlogos/googleg/v6/web-24dp/logo_googleg_color_24dp.png" alt="Google Logo">
                 Sign in with Google
@@ -172,8 +173,7 @@
 
             <div class="admin-sec" style="flex: 1; display:flex; flex-direction:column;">
                 <h4>User Registry Audit</h4>
-                <div class="roster-list" id="admin-user-roster">
-                    </div>
+                <div class="roster-list" id="admin-user-roster"></div>
             </div>
         </div>
     </div>
@@ -185,7 +185,7 @@
         import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
         // MASTER CONFIGURATION IDENTIFICATION KEY
-        const ADMIN_GMAIL = "your_actual_email@gmail.com"; // 👈 REPLACE WITH YOUR EXACT GOOGLE ACCOUNT GMAIL ADDRESS!
+        const ADMIN_GMAIL = "your_actual_email@gmail.com"; // 👈 CHANGE THIS VALUE RIGHT HERE!
 
         const firebaseConfig = {
             apiKey: "AIzaSyBOMhYlrzoSgabnphKfZuT8YW52ZkeL9Os",
@@ -292,12 +292,10 @@
 
         // Read Live System Configurations Controls (Kill Switch and Announcement Banners)
         function listenToSystemConfigurations() {
-            // Watch Server Operational State Status
             onSnapshot(doc(db, "system", "config"), (snapshot) => {
                 if (snapshot.exists()) {
                     const data = snapshot.data();
                     
-                    // If server operational switch toggled to killed state offline
                     if (data.serverOnline === false && currentUser.email.toLowerCase() !== ADMIN_GMAIL.toLowerCase()) {
                         currentChattingWith.innerText = "⚠️ SERVER OPERATION PAUSED BY ADMINISTRATOR";
                         footerInputDeck.classList.add("hidden");
@@ -307,7 +305,6 @@
                         footerInputDeck.classList.remove("hidden");
                     }
 
-                    // Display Announcement Headline text
                     if (data.announcement) {
                         sysAnnouncement.innerText = `📣 SYSTEM NOTICE: ${data.announcement}`;
                         sysAnnouncement.classList.remove("hidden");
@@ -315,7 +312,6 @@
                         sysAnnouncement.classList.add("hidden");
                     }
 
-                    // Update admin UI interface button display text
                     if (currentUser.email.toLowerCase() === ADMIN_GMAIL.toLowerCase()) {
                         killSwitchBtn.innerText = data.serverOnline === false ? "RESUME SERVER" : "SHUTDOWN CHAT";
                         killSwitchBtn.style.background = data.serverOnline === false ? "#00a884" : "#ea0038";
@@ -323,7 +319,6 @@
                 }
             });
 
-            // Handle active direct user kicker signals
             onSnapshot(doc(db, "kicks", currentUser.email.toLowerCase()), async (snapshot) => {
                 if (snapshot.exists()) {
                     alert("⚠️ Admin Action: You have been kicked out of the current active live session chat box module.");
@@ -333,7 +328,6 @@
             });
         }
 
-        // Active Connection Initialization Target Handlers
         document.getElementById("start-chat-btn").addEventListener("click", () => {
             setupActiveConversationTarget(targetUserInput.value.trim());
             targetUserInput.value = "";
@@ -350,7 +344,6 @@
             loadMessages();
         }
 
-        // Send Message Processing Engine
         async function sendChatMessage() {
             if(!activeChatEmail) return alert("Select target user line sequence node workspace path first.");
             const text = messageInput.value.trim();
@@ -384,7 +377,6 @@
         document.getElementById("send-btn").addEventListener("click", sendChatMessage);
         messageInput.addEventListener("keypress", (e) => { if(e.key === 'Enter') sendChatMessage(); });
 
-        // Database message content query listener pipeline mapping
         function loadMessages() {
             if (unsubscribeChat) unsubscribeChat();
             const myEmail = currentUser.email.toLowerCase();
@@ -421,9 +413,7 @@
             });
         }
 
-        /* MASTER SUPER ADMIN MODULE ENGINE EXECUTIONS LOGIC */
         function runAdminEngineTracker() {
-            // Track full global user directories presence matrices logs
             onSnapshot(collection(db, "presence"), (snapshot) => {
                 adminUserRoster.innerHTML = "";
                 snapshot.forEach((doc) => {
@@ -434,7 +424,6 @@
                         <span style="overflow:hidden; text-overflow:ellipsis; max-width:180px;" title="${data.email}">${data.name}</span>
                         <span class="status-dot ${data.status === 'online' ? 'dot-online' : 'dot-offline'}" title="${data.status}"></span>
                     `;
-                    // Click an auditing item line inside tracking list to populate target modification inputs instantly!
                     item.addEventListener("click", () => {
                         modTargetInput.value = data.email;
                         setupActiveConversationTarget(data.email);
@@ -443,13 +432,11 @@
                 });
             });
 
-            // Server Kill Switch Handler Event Listener
             killSwitchBtn.onclick = async () => {
                 const currentStatus = killSwitchBtn.innerText === "SHUTDOWN CHAT";
                 await setDoc(doc(db, "system", "config"), { serverOnline: !currentStatus }, { merge: true });
             };
 
-            // Post Global Broadcasting System Headline Notice Alerts Banner
             document.getElementById("post-announcement-btn").onclick = async () => {
                 const text = announcementInput.value.trim();
                 if(!text) return;
@@ -457,12 +444,10 @@
                 announcementInput.value = "";
             };
 
-            // Clear Global Broadcasting Banners Data Mapping
             document.getElementById("clear-announcement-btn").onclick = async () => {
                 await setDoc(doc(db, "system", "config"), { announcement: "" }, { merge: true });
             };
 
-            // Enforce Immediate User Ban Rules Execution Database Logs Mutation
             document.getElementById("ban-user-btn").onclick = async () => {
                 const target = modTargetInput.value.trim().toLowerCase();
                 if(!target || target === ADMIN_GMAIL.toLowerCase()) return alert("Invalid operation entry action target routing flag path sequence loop.");
@@ -472,7 +457,6 @@
                 modTargetInput.value = "";
             };
 
-            // Pardon (Unban) User Node
             document.getElementById("unban-user-btn").onclick = async () => {
                 const target = modTargetInput.value.trim().toLowerCase();
                 if(!target) return;
@@ -481,7 +465,6 @@
                 modTargetInput.value = "";
             };
 
-            // Kick Instantly Module Triggers Pipeline Signal
             document.getElementById("kick-user-btn").onclick = async () => {
                 const target = modTargetInput.value.trim().toLowerCase();
                 if(!target || target === ADMIN_GMAIL.toLowerCase()) return;
