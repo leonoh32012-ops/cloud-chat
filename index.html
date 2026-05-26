@@ -4,207 +4,157 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Cloud Chat - Sovereign Core Edition</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://unpkg.com/html5-qrcode"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f2f5; height: 100vh; display: flex; justify-content: center; align-items: center; overflow: hidden; }
         
-        #auth-container { background: white; width: 450px; height: 500px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); display: flex; flex-direction: column; overflow: hidden; justify-content: center; align-items: center; }
+        #auth-container { background: white; width: 450px; height: auto; min-height: 520px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); display: flex; flex-direction: column; overflow: hidden; justify-content: center; align-items: center; padding: 30px; }
         .hidden { display: none !important; }
         
-        /* Auth Styles */
-        .auth-box { padding: 40px; text-align: center; width: 100%; }
+        /* Auth & Phone Input Styles */
+        .auth-box { text-align: center; width: 100%; }
         .auth-box h2 { margin-bottom: 12px; color: #008069; font-size: 28px; }
-        .auth-box p { color: #667781; margin-bottom: 35px; font-size: 15px; }
-        .google-btn { display: inline-flex; align-items: center; gap: 12px; padding: 14px 28px; background: white; color: #54656f; border: 1px solid #e1e9eb; border-radius: 24px; cursor: pointer; font-size: 16px; font-weight: 600; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .auth-box p { color: #667781; margin-bottom: 25px; font-size: 14px; }
+        
+        .phone-form-group { margin-bottom: 20px; text-align: left; width: 100%; }
+        .phone-form-group label { display: block; font-size: 12px; font-weight: bold; color: #54656f; margin-bottom: 6px; text-transform: uppercase; }
+        .phone-row-layout { display: flex; gap: 8px; }
+        .country-select { padding: 12px; border: 1px solid #e1e9eb; border-radius: 8px; background: #f0f2f5; font-size: 14px; max-width: 130px; outline: none; }
+        .phone-input-field { flex: 1; padding: 12px; border: 1px solid #e1e9eb; border-radius: 8px; font-size: 15px; outline: none; }
+        
+        .google-btn { display: inline-flex; align-items: center; justify-content: center; gap: 12px; padding: 14px 28px; background: white; color: #54656f; border: 1px solid #e1e9eb; border-radius: 24px; cursor: pointer; font-size: 16px; font-weight: 600; box-shadow: 0 2px 5px rgba(0,0,0,0.05); width: 100%; margin-top: 10px; }
         .google-btn:hover { background: #f0f2f5; }
-        .google-icon { width: 22px; height: 22px; }
 
+        /* QR Code & Scanner Terminal Overlay Screens */
+        .universal-modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.7); display: flex; justify-content: center; align-items: center; z-index: 15000; backdrop-filter: blur(4px); padding: 20px; }
+        .modal-card-widget { background: white; padding: 25px; border-radius: 12px; width: 100%; max-width: 420px; box-shadow: 0 8px 24px rgba(0,0,0,0.2); position: relative; }
+        .modal-card-widget h3 { margin-bottom: 15px; font-size: 18px; color: #111b21; }
+        .qr-render-zone { display: flex; justify-content: center; margin: 20px 0; padding: 10px; background: #fff; }
+        .scanner-viewport { width: 100%; height: 250px; background: #000; border-radius: 8px; overflow: hidden; margin-bottom: 15px; }
+        
         /* Interactive Device Selector */
         #device-modal { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.65); display: flex; justify-content: center; align-items: center; z-index: 10000; backdrop-filter: blur(4px); padding: 20px; }
-        .modal-box { background: white; padding: 30px; border-radius: 16px; width: 100%; max-width: 440px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); text-align: center; border: 1px solid rgba(0,0,0,0.05); }
-        .modal-box h3 { font-size: 22px; color: #111b21; margin-bottom: 8px; font-weight: 700; }
-        .modal-box p { font-size: 14px; color: #667781; margin-bottom: 24px; line-height: 1.4; }
-        
+        .modal-box { background: white; padding: 30px; border-radius: 16px; width: 100%; max-width: 440px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); text-align: center; }
         .device-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 15px; }
-        .device-opt-btn { background: #f8f9fa; color: #111b21; border: 2px solid #e9edef; padding: 16px 10px; border-radius: 12px; font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.2s ease; display: flex; flex-direction: column; align-items: center; gap: 8px; }
-        .device-opt-btn:hover { border-color: #008069; background: #f0fdf4; color: #008069; transform: translateY(-1px); }
-        .device-icon { font-size: 24px; }
-        .device-opt-btn.full-width { grid-column: span 2; padding: 12px; font-size: 14px; color: #667781; font-weight: 500; }
+        .device-opt-btn { background: #f8f9fa; color: #111b21; border: 2px solid #e9edef; padding: 16px 10px; border-radius: 12px; font-size: 15px; font-weight: 600; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+        .device-opt-btn:hover { border-color: #008069; background: #f0fdf4; color: #008069; }
+        .device-opt-btn.full-width { grid-column: span 2; padding: 12px; font-size: 14px; color: #667781; }
 
-        /* Ban Screen layout overlay */
         #ban-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #ea0038; color: white; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 9999; text-align: center; font-size: 24px; font-weight: bold; }
-        #ban-overlay p { font-size: 16px; margin-top: 10px; opacity: 0.9; }
-
-        /* Account Status Card Profile Panel Modal Window Overlay */
-        #profile-panel-modal { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(17, 27, 33, 0.85); display: flex; justify-content: center; align-items: center; z-index: 12000; backdrop-filter: blur(5px); padding: 20px; }
-        .profile-card-container { background: #ffffff; border-radius: 16px; width: 100%; max-width: 400px; box-shadow: 0 12px 40px rgba(0,0,0,0.25); border: 1px solid #e9edef; overflow: hidden; display: flex; flex-direction: column; }
-        .profile-card-header { background: #008069; color: white; padding: 20px; text-align: center; font-size: 18px; font-weight: bold; position: relative; }
-        .profile-card-body { padding: 25px; display: flex; flex-direction: column; gap: 14px; }
-        .profile-data-row { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f0f2f5; padding-bottom: 8px; font-size: 14px; }
-        .profile-data-row span:first-child { color: #667781; font-weight: 600; }
-        .profile-data-row span:last-child { color: #111b21; font-weight: bold; }
-        .profile-close-btn { background: #54656f; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; font-size: 14px; text-align: center; transition: background 0.2s; margin-top: 10px; }
-        .profile-close-btn:hover { background: #111b21; }
 
         /* Full Grid Layout */
-        #chat-container { width: 100vw; height: 100vh; display: grid; grid-template-columns: 320px 1fr; background-color: #fff; }
-        #chat-container.show-admin { grid-template-columns: 320px 1fr 380px; }
+        #chat-container { width: 100vw; height: 100vh; display: grid; grid-template-columns: 340px 1fr; background-color: #fff; }
+        #chat-container.show-admin { grid-template-columns: 340px 1fr 380px; }
         
         /* Left Sidebar Panel */
         .sidebar { background: #ffffff; border-right: 1px solid #e9edef; display: flex; flex-direction: column; }
-        .sidebar-header { background: #f0f2f5; padding: 16px; display: flex; justify-content: space-between; align-items: center; height: 60px; gap: 4px; }
+        .sidebar-header { background: #f0f2f5; padding: 12px; display: flex; flex-direction: column; gap: 10px; border-bottom: 1px solid #e9edef; }
+        .profile-identity-bar { display: flex; justify-content: space-between; align-items: center; width: 100%; }
         #user-display { font-weight: 600; color: #111b21; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
         
-        .token-badge { background: #e3f2fd; color: #0d47a1; font-size: 11px; padding: 4px 8px; border-radius: 20px; font-weight: bold; white-space: nowrap; border: 1px solid #bbdefb; cursor: pointer; }
+        .token-badge { background: #e3f2fd; color: #0d47a1; font-size: 11px; padding: 4px 8px; border-radius: 20px; font-weight: bold; border: 1px solid #bbdefb; }
+        .header-action-button-grid { display: flex; gap: 4px; width: 100%; flex-wrap: wrap; }
+        .header-action-button-grid button { flex: 1; min-width: 65px; padding: 6px 4px; font-size: 11px; font-weight: bold; border-radius: 4px; border: none; cursor: pointer; text-align: center; color: white; }
+        
+        .btn-ui-green { background: #008069; }
+        .btn-ui-orange { background: #ffb300; color: #5d4037 !important; }
+        .btn-ui-teal { background: #00a884; }
+        .btn-ui-slate { background: #54656f; }
+        .btn-ui-red { background: #ea0038; }
 
-        .header-buttons { display: flex; gap: 4px; align-items: center; }
-        .profile-trigger-top-btn { background: #54656f; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 600; }
-        .logout-btn { background: #ea0038; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 600; }
-        .admin-toggle-btn { background: #00a884; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 600; display: none; }
-        .shop-toggle-btn { background: #ffb300; color: #5d4037; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: bold; }
+        /* Social Connection Tabs View Layout */
+        .social-nav-tabs { display: flex; background: #f0f2f5; border-bottom: 1px solid #e9edef; }
+        .social-tab-trigger { flex: 1; text-align: center; padding: 10px; font-size: 12px; font-weight: bold; color: #54656f; cursor: pointer; border-bottom: 3px solid transparent; }
+        .social-tab-trigger.active-tab { color: #008069; border-bottom-color: #008069; background: #fff; }
 
         .search-area { padding: 12px; background: #fff; border-bottom: 1px solid #e9edef; display: flex; flex-direction: column; gap: 6px; }
         .search-area input { width: 100%; padding: 10px 14px; border: none; background: #f0f2f5; border-radius: 8px; font-size: 13px; outline: none; }
-        .search-area button { width: 100%; border: none; padding: 10px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 13px; }
-        .btn-direct { background: #008069; color: white; }
+        .search-area button { width: 100%; border: none; padding: 10px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 13px; background: #008069; color: white; }
         
-        .active-user-list { flex: 1; padding: 15px; background: #fff; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
+        .active-user-list { flex: 1; padding: 12px; background: #fff; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
         .active-card { background: #f0f2f5; border-left: 4px solid #008069; padding: 10px; border-radius: 0 8px 8px 0; font-size: 13px; color: #111b21; cursor: pointer; position: relative; }
         .active-card.group-card { border-left-color: #0288d1; }
         .active-card small { color: #667781; display: block; margin-bottom: 2px; font-weight: bold; text-transform: uppercase; }
+        .card-inline-action-btn { position: absolute; right: 10px; top: 10px; padding: 4px 8px; background: #008069; color: white; font-size: 11px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+
+        /* Notification Override Engine Configuration Form Inside Card */
+        .notification-bell-indicator { position: absolute; right: 8px; bottom: 8px; font-size: 12px; }
 
         /* Main Conversation Engine */
-        .main-chat-window { display: flex; flex-direction: column; background: #efeae2; position: relative; height: 100%; min-height: 0; overflow: hidden; }
+        .main-chat-window { display: flex; flex-direction: column; background: #efeae2; position: relative; height: 100%; overflow: hidden; }
         .main-chat-window::before { content: ""; position: absolute; top:0; left:0; width:100%; height:100%; background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png'); opacity: 0.05; pointer-events: none; }
         
         .main-header { height: 60px; background: #f0f2f5; padding: 0 20px; display: flex; align-items: center; border-bottom: 1px solid #e9edef; z-index: 10; justify-content: space-between; flex-shrink: 0; }
         #current-chatting-with { font-size: 14px; color: #111b21; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 60%; }
         
         .header-actions-wrapper { display: flex; gap: 8px; align-items: center; }
-        .report-incident-btn { background: #e07a5f; color: white; border: none; padding: 6px 12px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer; display: none; }
         .back-nav-btn { background: #54656f; color: white; border: none; padding: 6px 12px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer; display: none; }
         
-        /* Calling elements panel */
-        #call-panel-interface { background: #111b21; color: white; padding: 12px 25px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #25d366; z-index: 15; font-size: 13px; flex-shrink: 0; }
+        /* Hardware Call Infrastructure Terminal */
+        #call-panel-interface { background: #111b21; color: white; padding: 12px 25px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #25d366; z-index: 15; font-size: 13px; }
         .call-actions-row { display: flex; gap: 8px; }
-        .call-act-btn { padding: 6px 12px; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 11px; }
-        .call-rec { background: #ea0038; color: white; }
-        .call-sil { background: #ff9100; color: white; }
-        .call-can { background: #607d8b; color: white; }
+        .call-act-btn { padding: 6px 12px; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 11px; color: white; }
+        .call-rec { background: #ea0038; }
+        .call-sil { background: #ff9100; }
+        .call-can { background: #607d8b; }
 
-        /* Core Flex Constraints to avoid cutting off input elements */
-        #chat-box { flex: 1; min-height: 0; padding: 25px 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; z-index: 1; }
-        
-        /* Chat System Announcements Banner */
-        .system-banner { background: #ffeecd; color: #7a5200; text-align: center; padding: 8px; font-size: 13px; font-weight: 600; border-bottom: 1px solid #ffd080; z-index: 12; flex-shrink: 0; }
-        .media-stats-ticker { background: #e1f5fe; color: #0277bd; padding: 6px 20px; font-size: 12px; font-weight: 600; z-index: 12; display: flex; justify-content: space-between; flex-shrink: 0; }
+        #chat-box { flex: 1; padding: 25px 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; z-index: 1; }
+        .system-banner { background: #ffeecd; color: #7a5200; text-align: center; padding: 8px; font-size: 13px; font-weight: 600; border-bottom: 1px solid #ffd080; z-index: 12; }
+        .media-stats-ticker { background: #e1f5fe; color: #0277bd; padding: 6px 20px; font-size: 12px; font-weight: 600; z-index: 12; display: flex; justify-content: space-between; }
 
-        /* Chat Bubbles and Admin Override Trash Controls */
+        /* Chat Bubbles */
         .msg { padding: 8px 14px; border-radius: 8px; max-width: 75%; font-size: 15px; word-break: break-word; display: flex; flex-direction: column; box-shadow: 0 1px 1px rgba(0,0,0,0.05); position: relative; }
         .msg.sent { background: #d9fdd3; align-self: flex-end; border-top-right-radius: 0; }
         .msg.received { background: white; align-self: flex-start; border-top-left-radius: 0; }
-        .msg-sender-tag { font-size: 11px; font-weight: bold; color: #0288d1; margin-bottom: 3px; display: block; }
+        .msg-sender-tag { font-size: 11px; font-weight: bold; color: #0288d1; margin-bottom: 3px; }
         .msg img, .msg video { max-width: 100%; max-height: 280px; object-fit: contain; border-radius: 6px; margin-top: 6px; }
         .msg-meta-row { display: flex; justify-content: space-between; align-items: center; gap: 15px; margin-top: 5px; }
         .time { font-size: 10px; color: #667781; }
         .admin-delete-msg-btn { background: none; border: none; color: #ea0038; cursor: pointer; font-size: 11px; font-weight: bold; }
 
-        /* Bottom Controls Box & Upgrade Plus Drawer Tray */
-        .input-area { padding: 12px 20px; background: #f0f2f5; display: flex; align-items: center; gap: 10px; z-index: 20; flex-shrink: 0; position: relative; border-top: 1px solid #e9edef; }
-        .input-area input[type="text"] { flex: 1; padding: 12px 16px; border: none; background: white; border-radius: 8px; outline: none; font-size: 15px; min-width: 0; }
-        .input-area button.send-main-btn { background: #008069; color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 15px; flex-shrink: 0; }
+        /* Bottom Controls Box & Utility Drawers */
+        .input-area { padding: 12px 20px; background: #f0f2f5; display: flex; align-items: center; gap: 10px; z-index: 20; border-top: 1px solid #e9edef; }
+        .input-area input[type="text"] { flex: 1; padding: 12px 16px; border: none; background: white; border-radius: 8px; outline: none; font-size: 15px; }
+        .input-area button.send-main-btn { background: #008069; color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 15px; }
         
-        /* Modular Drawer Icon Plus Trigger Button */
-        .plus-action-trigger { background: #54656f; color: white; border: none; width: 42px; height: 42px; border-radius: 50%; font-size: 22px; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: background 0.2s; font-weight: bold; flex-shrink: 0; }
-        .plus-action-trigger:hover { background: #008069; }
+        .plus-action-trigger { background: #54656f; color: white; border: none; width: 42px; height: 42px; border-radius: 50%; font-size: 22px; cursor: pointer; display: flex; justify-content: center; align-items: center; font-weight: bold; }
         
         /* Unified Sliding Tool Tray Drawer Component */
-        .action-tray-drawer { display: none; background: #f0f2f5; border-top: 1px solid #e9edef; padding: 15px 20px; flex-direction: column; gap: 12px; z-index: 18; flex-shrink: 0; }
-        .action-tray-row { display: flex; align-items: center; justify-content: flex-start; gap: 12px; overflow-x: auto; padding-bottom: 4px; }
+        .action-tray-drawer { display: none; background: #f0f2f5; border-top: 1px solid #e9edef; padding: 15px 20px; flex-direction: column; gap: 12px; z-index: 18; }
+        .action-tray-row { display: flex; align-items: center; justify-content: flex-start; gap: 12px; overflow-x: auto; }
         
-        .tray-action-btn { background: white; border: 1px solid #e9edef; padding: 10px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; color: #111b21; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); white-space: nowrap; }
-        .tray-action-btn:hover { background: #e3f2fd; color: #0d47a1; }
-        
-        /* 💸 RECONFIGURED CLOUD TOKEN P2P PLATFORM FOR THE TRAY (TYPABLE) */
-        .ct-transfer-subcontainer { display: flex; background: white; border-radius: 8px; padding: 10px 12px; flex-wrap: wrap; align-items: center; gap: 8px; border: 1px solid #e9edef; margin-top: 4px; width: 100%; max-width: 550px; box-shadow: 0 1px 2px rgba(0,0,0,0.03); }
-        .ct-transfer-subcontainer span { font-size: 12px; font-weight: bold; color: #54656f; }
-        .ct-transfer-subcontainer input[type="text"] { border: 1px solid #e9edef; background: #f0f2f5; padding: 8px 10px; font-size: 13px; border-radius: 4px; outline: none; flex: 2; min-width: 150px; color: #111b21; }
-        .ct-transfer-subcontainer input[type="number"] { border: 1px solid #e9edef; background: #f0f2f5; padding: 8px 10px; font-size: 13px; border-radius: 4px; outline: none; flex: 1; min-width: 80px; color: #111b21; }
-        .ct-transfer-subcontainer button { background: #ffb300; color: #5d4037; font-weight: bold; border: none; padding: 8px 14px; border-radius: 4px; font-size: 13px; cursor: pointer; white-space: nowrap; }
-        .ct-transfer-subcontainer button:hover { background: #ffa000; }
+        .tray-action-btn { background: white; border: 1px solid #e9edef; padding: 10px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; color: #111b21; cursor: pointer; display: flex; align-items: center; gap: 6px; white-space: nowrap; }
 
-        /* RIGHT SIDEBAR PANEL: ADMIN COMMAND CENTER */
-        .admin-panel { background: #202c33; color: #e9edef; border-left: 1px solid #3b4a54; display: flex; flex-direction: column; padding: 15px; z-index: 100; overflow-y: auto; }
-        .admin-panel h3 { color: #00a884; font-size: 17px; margin-bottom: 12px; border-bottom: 1px solid #3b4a54; padding-bottom: 6px; display: flex; justify-content: space-between; align-items: center; }
+        /* Global Reconfigured Settings Panel Workspace */
+        #settings-panel-modal { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(17,27,33,0.8); display: flex; justify-content: center; align-items: center; z-index: 14000; backdrop-filter: blur(4px); }
+        .settings-card { background: white; width: 100%; max-width: 440px; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; }
+        .settings-header { background: #008069; color: white; padding: 20px; font-weight: bold; font-size: 18px; }
+        .settings-body { padding: 20px; display: flex; flex-direction: column; gap: 15px; }
+        .settings-row { display: flex; flex-direction: column; gap: 6px; }
+        .settings-row label { font-size: 12px; font-weight: bold; color: #54656f; text-transform: uppercase; }
+        .settings-row select, .settings-row input { width: 100%; padding: 10px; border: 1px solid #e9edef; border-radius: 6px; background: #f0f2f5; outline: none; }
+
+        /* Admin Space Styles */
+        .admin-panel { background: #202c33; color: #e9edef; border-left: 1px solid #3b4a54; display: flex; flex-direction: column; padding: 15px; overflow-y: auto; }
+        .admin-panel h3 { color: #00a884; font-size: 17px; margin-bottom: 12px; border-bottom: 1px solid #3b4a54; padding-bottom: 6px; }
         .admin-sec { background: #111b21; padding: 12px; border-radius: 8px; margin-bottom: 12px; }
-        .admin-sec h4 { font-size: 11px; color: #00a884; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
-        .admin-sec input, .admin-sec select { width: 100%; padding: 8px; background: #2a3942; border: none; border-radius: 4px; color: white; font-size: 13px; margin-bottom: 8px; outline: none; }
-        .admin-btn { width: 100%; padding: 8px; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 13px; margin-bottom: 5px; }
-        .btn-danger { background: #ea0038; color: white; }
-        .btn-safe { background: #00a884; color: white; }
-        .btn-warn { background: #e07a5f; color: white; }
-        .kill-switch-box { display: flex; align-items: center; justify-content: space-between; padding: 5px 0; font-size: 13px; }
+        .admin-sec h4 { font-size: 11px; color: #00a884; margin-bottom: 6px; text-transform: uppercase; }
+        .admin-sec input, .admin-sec select { width: 100%; padding: 8px; background: #2a3942; border: none; border-radius: 4px; color: white; font-size: 13px; margin-bottom: 8px; }
+        .admin-btn { width: 100%; padding: 8px; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 13px; margin-bottom: 5px; color: white; }
         
-        /* Quick Target Admin Group Row Buttons */
-        .admin-shortcut-row { display: flex; gap: 6px; margin-bottom: 8px; }
-        .admin-shortcut-btn { flex: 1; background: #2a3942; border: 1px solid #3b4a54; border-radius: 4px; color: #ffb300; font-size: 11px; padding: 6px; cursor: pointer; font-weight: bold; text-align: center; }
-        .admin-shortcut-btn:hover { background: #3b4a54; color: #fff; }
+        .roster-list { max-height: 150px; overflow-y: auto; font-size: 12px; display: flex; flex-direction: column; gap: 4px; }
+        .roster-item { background: #202c33; padding: 8px; border-radius: 4px; cursor: pointer; }
 
-        /* AUDITING LIST ARCHITECTURE FOR SNOOPING AND DEEP DIVE LOGS */
-        .audit-inspect-headline { background: #2a3942; padding: 6px; border-radius: 4px; font-size: 11px; margin-bottom: 6px; word-break: break-all; color: #ffb300; }
-        .audit-sub-list { max-height: 100px; overflow-y: auto; font-size: 11px; display: flex; flex-direction: column; gap: 4px; background: #0c1317; padding: 6px; border-radius: 4px; margin-bottom: 6px; }
-        .audit-sub-item { padding: 4px; border-bottom: 1px solid #202c33; cursor: pointer; color: #e9edef; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .audit-sub-item:hover { color: #00e676; }
-
-        /* 🛒 FIXED SCROLLABLE MARKETPLACE SHOP DRAWER VIEW WITH FULL INTEGRATED CT TRANSFER EXCHANGER */
-        #shop-panel { background: #1e1e24; color: #fff; border-left: 1px solid #2d2d35; display: flex; flex-direction: column; padding: 15px; z-index: 200; height: 100%; overflow: hidden; }
-        #shop-panel h3 { color: #ffb300; font-size: 18px; margin-bottom: 12px; border-bottom: 1px solid #2d2d35; padding-bottom: 6px; flex-shrink: 0; }
-        .shop-scroll-content { flex: 1; overflow-y: auto; padding-right: 4px; }
-        .shop-item-card { background: #2a2a35; border: 1px solid #3e3e4a; border-radius: 8px; padding: 12px; margin-bottom: 12px; display: flex; flex-direction: column; gap: 6px; }
-        .shop-item-card h4 { color: #fff; font-size: 14px; display: flex; justify-content: space-between; align-items: center; }
-        .shop-item-card p { font-size: 12px; color: #b3b3cc; line-height: 1.4; }
-        .shop-buy-btn { background: #ffb300; color: #1e1e24; border: none; padding: 8px; border-radius: 6px; font-weight: bold; font-size: 12px; cursor: pointer; text-align: center; margin-top: 4px; }
-        .shop-buy-btn:hover { background: #ffa000; }
-        .shop-section-divider-title { font-size: 11px; text-transform: uppercase; letter-spacing: 0.8px; color: #8f8f9e; margin: 15px 0 8px 0; font-weight: bold; }
-
-        /* Directory Log Tracking lists */
-        .roster-list { max-height: 150px; overflow-y: auto; font-size: 12px; display: flex; flex-direction: column; gap: 4px; margin-top: 5px; }
-        .roster-item { background: #202c33; padding: 8px; border-radius: 4px; display: flex; flex-direction: column; gap: 2px; cursor: pointer; }
-        .roster-item:hover { background: #2a3942; }
-        .roster-row { display: flex; justify-content: space-between; align-items: center; }
-        .roster-device { font-size: 10px; color: #8696a0; font-style: italic; }
-        .roster-tier { font-size: 10px; color: #ffb300; font-weight: bold; }
-        .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
-        .dot-online { background: #00e676; }
-        .dot-offline { background: #9e9e9e; }
-
-        /* STANDARD MEDIA QUERIES */
+        /* Responsive Breakpoints */
         @media (max-width: 768px) {
             #chat-container { grid-template-columns: 1fr !important; }
-            #chat-container.show-admin { grid-template-columns: 1fr !important; }
-            .admin-panel, #shop-panel { position: fixed; right: 0; top: 0; height: 100vh; width: 100% !important; z-index: 500; }
             .sidebar { display: none; }
             .back-nav-btn { display: inline-block !important; }
             #chat-container.view-menu .sidebar { display: flex !important; width: 100% !important; }
             #chat-container.view-menu .main-chat-window { display: none !important; }
         }
-
-        /* 📱 HARDWARE FORCED EMULATION TARGET CLASSES */
-        .forced-phone #chat-container { grid-template-columns: 1fr !important; }
-        .forced-phone #chat-container.show-admin { grid-template-columns: 1fr !important; }
-        .forced-phone .sidebar { display: none; }
-        .forced-phone .back-nav-btn { display: inline-block !important; }
-        .forced-phone .admin-panel, .forced-phone #shop-panel { position: fixed; right: 0; top: 0; height: 100vh; width: 100% !important; z-index: 500; }
-        
-        .forced-phone #chat-container.view-menu .sidebar { display: flex !important; width: 100% !important; height: 100vh; }
-        .forced-phone #chat-container.view-menu .main-chat-window { display: none !important; }
-
-        /* 📟 TABLET OVERRIDE TARGET CONFIGS */
-        .forced-tablet #chat-container { grid-template-columns: 280px 1fr !important; }
-        .forced-tablet #chat-container.show-admin { grid-template-columns: 240px 1fr 260px !important; }
-        .forced-tablet .sidebar { display: flex !important; }
-        .forced-tablet .back-nav-btn { display: none !important; }
-        .forced-tablet .admin-panel, .forced-tablet #shop-panel { position: relative; width: auto !important; height: auto; }
     </style>
 </head>
 <body>
@@ -214,32 +164,55 @@
         <p>Your account has been permanently banned from this server by the developer administration.</p>
     </div>
 
-    <div id="profile-panel-modal" class="hidden">
-        <div class="profile-card-container">
-            <div class="profile-card-header">Sovereign Profile Matrix</div>
-            <div class="profile-card-body">
-                <div class="profile-data-row">
-                    <span>Account Identity:</span>
-                    <span id="prof-modal-email">...</span>
-                </div>
-                <div class="profile-data-row">
-                    <span>Hardware Node:</span>
-                    <span id="prof-modal-device">...</span>
-                </div>
-                <div class="profile-data-row">
-                    <span>Clearance Tier:</span>
-                    <span id="prof-modal-tier" style="color: #ffb300; text-transform: uppercase;">...</span>
-                </div>
-                <div class="profile-data-row">
-                    <span>Available Funds:</span>
-                    <span id="prof-modal-tokens" style="color: #008069;">...</span>
-                </div>
-                <div class="profile-data-row">
-                    <span>Daily Media Count:</span>
-                    <span id="prof-modal-quota">...</span>
-                </div>
-                <button class="profile-close-btn" id="profile-modal-close-trigger">Close Profile View</button>
+    <div id="hardware-call-cradle" class="universal-modal-overlay hidden">
+        <div class="modal-card-widget" style="text-align: center; background: #111b21; color: white;">
+            <div style="font-size: 40px; margin-bottom: 10px;">📞</div>
+            <h3 style="color: #25d366;" id="cradle-call-type">Inbound Network Cellular Call</h3>
+            <p id="cradle-call-identity" style="font-size: 16px; font-weight: bold; margin-bottom: 20px;">+1 (555) 019-2831</p>
+            <div style="display: flex; gap: 10px; justify-content: center;">
+                <button id="cradle-accept-btn" style="background: #25d366; border: none; padding: 12px 24px; border-radius: 24px; color: white; font-weight: bold; cursor: pointer;">Answer Call</button>
+                <button id="cradle-decline-btn" style="background: #ea0038; border: none; padding: 12px 24px; border-radius: 24px; color: white; font-weight: bold; cursor: pointer;">Hang Up</button>
             </div>
+        </div>
+    </div>
+
+    <div id="settings-panel-modal" class="hidden">
+        <div class="settings-card">
+            <div class="settings-header">System Device & Sound Configurations</div>
+            <div class="settings-body">
+                <div class="settings-row">
+                    <label>Incoming Alert Ringtone Pitch (Hardware Emulation)</label>
+                    <select id="settings-hardware-sound-selection">
+                        <option value="standard-ping">Standard Digital Ping (Default)</option>
+                        <option value="classic-bell">Old School Metallic Desk Bell</option>
+                        <option value="electronic-synth">Modern Electronic Synthesizer Ring</option>
+                        <option value="high-frequency">High Frequency Matrix Pulse</option>
+                    </select>
+                </div>
+                <div class="settings-row">
+                    <label>Isolation Override Sound Mappings</label>
+                    <p style="font-size: 11px; color:#667781; margin-bottom: 4px;">Isolate a dedicated channel node sound inside room rosters directly below.</p>
+                </div>
+                <button class="btn-ui-slate" id="settings-close-trigger-btn" style="padding: 12px; border:none; border-radius:6px; font-weight:bold; cursor:pointer; color:white;">Save and Close Matrix</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="qr-generator-modal" class="universal-modal-overlay hidden">
+        <div class="modal-card-widget" style="text-align: center;">
+            <h3>Your Secure Cryptographic Profile QR Node</h3>
+            <p style="color: #667781; font-size: 12px;">Let your friends scan this node matrix to bypass manual synchronization loops instantly.</p>
+            <div id="profile-qr-target-zone" class="qr-render-zone"></div>
+            <button class="btn-ui-slate" style="padding: 10px; border: none; border-radius: 6px; font-weight: bold; width: 100%; color: white; cursor: pointer;" onclick="document.getElementById('qr-generator-modal').classList.add('hidden')">Close Profile Node</button>
+        </div>
+    </div>
+
+    <div id="qr-scanner-modal" class="universal-modal-overlay hidden">
+        <div class="modal-card-widget">
+            <h3>Native Optical Camera Lens Scanner</h3>
+            <p style="color: #667781; font-size: 12px; margin-bottom: 12px;">Grant hardware lens verification access properties to automatically inject network alignment links.</p>
+            <div id="native-scanner-camera-viewport" class="scanner-viewport"></div>
+            <button class="btn-ui-red" id="stop-qr-lens-scanner-trigger-btn" style="padding: 10px; border: none; border-radius: 6px; font-weight: bold; width: 100%; cursor: pointer;">Kill Camera Stream Node</button>
         </div>
     </div>
 
@@ -248,36 +221,43 @@
             <h3>Device Declaration</h3>
             <p>Select your active hardware node to initialize the network feed session alignment.</p>
             <div class="device-grid">
-                <button class="device-opt-btn" data-device="PC / Laptop">
-                    <span class="device-icon">💻</span>
-                    <span>PC / Laptop</span>
-                </button>
-                <button class="device-opt-btn" data-device="iPhone">
-                    <span class="device-icon">🍎</span>
-                    <span>iPhone</span>
-                </button>
-                <button class="device-opt-btn" data-device="Android Mobile">
-                    <span class="device-icon">🤖</span>
-                    <span>Android</span>
-                </button>
-                <button class="device-opt-btn" data-device="Tablet / iPad">
-                    <span class="device-icon">📟</span>
-                    <span>Tablet</span>
-                </button>
-                <button class="device-opt-btn full-width" data-device="Other Device">
-                    🌐 Other / Alternative Endpoint
-                </button>
+                <button class="device-opt-btn" data-device="PC / Laptop"><span>💻 PC / Laptop</span></button>
+                <button class="device-opt-btn" data-device="iPhone"><span>🍎 iPhone Node</span></button>
+                <button class="device-opt-btn" data-device="Android Mobile"><span>🤖 Android Mobile</span></button>
+                <button class="device-opt-btn" data-device="Tablet / iPad"><span>📟 Tablet Terminal</span></button>
             </div>
         </div>
     </div>
 
     <div id="auth-container">
         <div class="auth-box">
-            <h2>Cloud Chat Platform</h2>
-            <p>Connect instantly with real-time tokenized pipeline controls.</p>
+            <h2>Cloud Chat Engine</h2>
+            <p>Register identity with verified hardware cellular parameters mapping.</p>
+            
+            <div class="phone-form-group">
+                <label>International Mobile Endpoint Destination</label>
+                <div class="phone-row-layout">
+                    <select id="auth-country-routing-matrix" class="country-select">
+                        <option value="+1">🇺🇸 US (+1)</option>
+                        <option value="+44">🇬🇧 UK (+44)</option>
+                        <option value="+61">🇦🇺 AU (+61)</option>
+                        <option value="+1">🇨🇦 CA (+1)</option>
+                        <option value="+86">🇨🇳 CN (+86)</option>
+                        <option value="+33">🇫🇷 FR (+33)</option>
+                        <option value="+49">🇩🇪 DE (+49)</option>
+                        <option value="+91">🇮🇳 IN (+91)</option>
+                        <option value="+81">🇯🇵 JP (+81)</option>
+                        <option value="+82">🇰🇷 KR (+82)</option>
+                        <option value="+7">🇷🇺 RU (+7)</option>
+                        <option value="+886">🇹🇼 TW (+886)</option>
+                    </select>
+                    <input type="text" id="auth-phone-manual-numerical-input" class="phone-input-field" placeholder="(555) 019-2831">
+                </div>
+            </div>
+
             <button class="google-btn" id="google-login-btn">
-                <img class="google-icon" src="https://fonts.gstatic.com/s/i/productlogos/googleg/v6/web-24dp/logo_googleg_color_24dp.png" alt="Google Logo">
-                Sign in with Google
+                <img style="width:20px; height:20px;" src="https://fonts.gstatic.com/s/i/productlogos/googleg/v6/web-24dp/logo_googleg_color_24dp.png" alt="Google">
+                Synchronize Account with Google
             </button>
         </div>
     </div>
@@ -286,24 +266,38 @@
         
         <div class="sidebar">
             <div class="sidebar-header">
-                <span id="user-display">Connecting...</span>
-                <span class="token-badge" id="my-token-display">0 CT</span>
-                <div class="header-buttons">
-                    <button id="top-bar-profile-trigger" class="profile-trigger-top-btn">👤 Profile</button>
-                    <button id="shop-toggle-btn" class="shop-toggle-btn">🛒 Shop</button>
-                    <button id="admin-toggle-btn" class="admin-toggle-btn">Admin 👑</button>
-                    <button id="logout-btn" class="logout-btn">Logout</button>
+                <div class="profile-identity-bar">
+                    <span id="user-display">Connecting Node Line...</span>
+                    <span class="token-badge" id="my-token-display">0 CT</span>
+                </div>
+                <div class="header-action-button-grid">
+                    <button id="top-nav-qr-code-btn" class="btn-ui-green">🖨️ My QR</button>
+                    <button id="top-nav-scan-lens-btn" class="btn-ui-teal">📷 Scan Lens</button>
+                    <button id="top-nav-settings-btn" class="btn-ui-slate">⚙️ Settings</button>
+                    <button id="admin-toggle-btn" class="btn-ui-orange" style="display:none;">Admin 👑</button>
+                    <button id="logout-btn" class="btn-ui-red">Logout</button>
                 </div>
             </div>
-            
-            <div class="search-area">
-                <input type="text" id="target-user-input" placeholder="User email or comma-separated list...">
-                <div style="display:flex; gap:6px; margin-top:4px;">
-                    <button id="start-chat-btn" class="btn-direct" style="flex:1;">Open Chat</button>
-                </div>
+
+            <div class="social-nav-tabs">
+                <div class="social-tab-trigger active-tab" id="social-tab-trigger-rooms">Channels / Rooms</div>
+                <div class="social-tab-trigger" id="social-tab-trigger-inbox">Social Inbox Ledger <b id="social-inbox-counter-badge" style="color:#ea0038; display:none;">(0)</b></div>
             </div>
             
-            <div class="active-user-list" id="sidebar-rooms-deck"></div>
+            <div id="sidebar-context-view-chats-deck" class="view-panel-group">
+                <div class="search-area">
+                    <input type="text" id="target-user-input" placeholder="User email or comma-separated list...">
+                    <button id="start-chat-btn">Open Chat Feed Link</button>
+                </div>
+                <div class="active-user-list" id="sidebar-rooms-deck"></div>
+            </div>
+
+            <div id="sidebar-context-view-social-inbox-deck" class="view-panel-group hidden" style="padding: 12px; display: flex; flex-direction: column; gap: 8px;">
+                <div style="font-size: 11px; font-weight: bold; color: #54656f; text-transform: uppercase; margin-bottom: 4px;">Inbound Relationship Request Queue</div>
+                <div id="social-inbox-rendering-deck" style="display: flex; flex-direction: column; gap: 6px;">
+                    <div style="text-align: center; color: #667781; font-size: 12px; padding: 20px;">Social Inbox is currently clear.</div>
+                </div>
+            </div>
         </div>
 
         <div class="main-chat-window">
@@ -315,7 +309,7 @@
             </div>
 
             <div id="call-panel-interface" class="hidden">
-                <div>🟩 Streaming Session: <span id="call-status-text">Active...</span></div>
+                <div>🟩 Cellular Call Channel Stream: <span id="call-status-text">Active...</span></div>
                 <div class="call-actions-row">
                     <button class="call-act-btn call-rec" id="call-btn-rec">Record 🔴</button>
                     <button class="call-act-btn call-sil" id="call-btn-sil">Silent 🔕</button>
@@ -327,7 +321,7 @@
                 <button id="header-back-nav" class="back-nav-btn">⬅️ Rooms</button>
                 <span id="current-chatting-with">Select an active workspace channel pipeline from the sidebar</span>
                 <div class="header-actions-wrapper">
-                    <button id="header-report-trigger" class="report-incident-btn">⚠️ Report Channel</button>
+                    <button id="header-add-friend-network-trigger" class="btn-ui-green" style="padding: 6px 12px; font-size: 12px; font-weight: bold; border-radius: 4px; border: none; display: none; cursor: pointer; height: 32px; color: white;">➕ Dispatch Friend Request</button>
                 </div>
             </div>
             
@@ -335,15 +329,9 @@
             
             <div class="action-tray-drawer" id="action-utility-drawer">
                 <div class="action-tray-row">
-                    <button class="tray-action-btn" id="tray-trigger-call" style="background: #25d366; color: white; border: none;">📞 Initiate System Call</button>
+                    <button class="tray-action-btn" id="tray-trigger-cellular-hardware-call-btn" style="background: #25d366; color: white; border: none; font-weight: bold;">📞 Route Cellular Call</button>
                     <button class="tray-action-btn" onclick="document.getElementById('file-input').click()">📁 Attach Payload Media</button>
                     <input type="file" id="file-input" accept="image/*,video/*" style="display:none;">
-                </div>
-                <div class="ct-transfer-subcontainer">
-                    <span>💸 Gift CT:</span>
-                    <input type="text" id="tray-transfer-recipient" placeholder="Recipient's Email Address">
-                    <input type="number" id="tray-transfer-amount" placeholder="Amount">
-                    <button id="tray-transfer-send-btn">Send Transfer</button>
                 </div>
             </div>
 
@@ -354,101 +342,26 @@
             </div>
         </div>
 
-        <div id="shop-panel" class="hidden">
-            <h3>Cloud Token Store 🛒 <button class="back-nav-btn" style="float:right;" onclick="document.getElementById('shop-panel').classList.add('hidden')">✕ Close</button></h3>
-            
-            <div class="shop-scroll-content">
-                <div style="margin-bottom: 12px; font-size: 13px; color: #ffb300; font-weight: bold; background: #2a2a35; padding: 10px; border-radius: 6px; line-height: 1.4;">
-                    Earn +10 CT every single day automatically on rollover log!
-                </div>
-                
-                <div class="shop-item-card">
-                    <h4><span>⭐ Pro Class Access Plan</span> <b style="color:#ffb300;">20 CT / day</b></h4>
-                    <p>Expands your attachment limit configuration to send 50 images/videos per day.</p>
-                    <button class="shop-buy-btn" data-buy="pro">Acquire Pro Authorization</button>
-                </div>
-
-                <div class="shop-item-card">
-                    <h4><span>🚀 Business Elite Matrix</span> <b style="color:#ffb300;">150 CT / month</b></h4>
-                    <p>Completely unlocks infinite storage arrays for media attachments plus grants exclusive rights to initiate calls to any recipient tier.</p>
-                    <button class="shop-buy-btn" data-buy="business">Acquire Business License</button>
-                </div>
-
-                <div class="shop-item-card">
-                    <h4><span>🛡️ Vanguard Elite Armor</span> <b style="color:#ffb300;">300 CT / year</b></h4>
-                    <p>Unlocks complete server network profile cloaking! Hides your hardware device and target room activity states entirely from regular user panels.</p>
-                    <button class="shop-buy-btn" data-buy="vanguard">Acquire Vanguard License</button>
-                </div>
-
-                <div class="shop-section-divider-title">P2P Financial Terminal</div>
-                <div class="shop-item-card" style="border-color: #ffb300; background: #23232c;">
-                    <h4 style="color: #ffb300;">Execute Peer-to-Peer CT Transfer</h4>
-                    <p>Transmit an instant token payload directly to another user's balance ledger registry link.</p>
-                    <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 8px;">
-                        <input type="text" id="shop-transfer-target" placeholder="Recipient's Exact Email Address" style="width: 100%; padding: 10px; border: 1px solid #3e3e4a; background: #1a1a22; border-radius: 6px; color: #fff; font-size: 13px; outline: none;">
-                        <div style="display: flex; gap: 8px;">
-                            <input type="number" id="shop-transfer-amount" placeholder="CT Amount" style="flex: 1; padding: 10px; border: 1px solid #3e3e4a; background: #1a1a22; border-radius: 6px; color: #fff; font-size: 13px; outline: none;">
-                            <button id="shop-transfer-execute-btn" style="background: #ffb300; color: #1e1e24; border: none; padding: 0 16px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 13px;">Transfer CT</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
         <div id="admin-panel" class="admin-panel hidden">
-            <h3>Admin Space 👑 <button class="back-nav-btn" style="float:right; background:#ea0038;" onclick="document.getElementById('admin-panel').classList.add('hidden'); document.getElementById('chat-container').classList.remove('show-admin');">✕ Close</button></h3>
+            <h3>Admin Space 👑</h3>
             
-            <div class="admin-sec">
-                <h4>User Deep Inspection Matrix</h4>
-                <div class="audit-inspect-headline" id="admin-inspect-email-label">Click a user on the registry below to crawl internal records</div>
-                
-                <div style="font-size:10px; color:#8696a0; margin-bottom:2px; font-weight:bold;">DETECTED PRIVATE FEEDS:</div>
-                <div class="audit-sub-list" id="admin-inspect-private-list"></div>
-
-                <div style="font-size:10px; color:#8696a0; margin-bottom:2px; font-weight:bold;">JOINED MULTI-USER GROUPS:</div>
-                <div class="audit-sub-list" id="admin-inspect-group-list"></div>
-            </div>
-
-            <div class="admin-sec" style="background:#1c252a;">
-                <h4 style="color:#ffb300;">Inbound Report Incident Mailbox 📩</h4>
-                <div class="roster-list" id="admin-ticket-mailbox" style="max-height:130px;">
-                    <div style="color:#667781; text-align:center; padding:10px; font-size:11px;">Mailroom system idle...</div>
-                </div>
-            </div>
-
             <div class="admin-sec">
                 <h4>Sovereign Economic Bank</h4>
                 <input type="text" id="admin-bank-target-manual-input" placeholder="Type target email, 'myself', or 'everyone'">
-                <div class="admin-shortcut-row">
-                    <button class="admin-shortcut-btn" id="admin-shortcut-myself-btn">🙋 Target Myself</button>
-                    <button class="admin-shortcut-btn" id="admin-shortcut-everyone-btn" style="color: #00e676;">🌍 Target Everyone</button>
-                </div>
                 <input type="text" id="admin-token-amount-input" placeholder="Value: inf, 50, -20, etc.">
-                <input type="text" id="admin-time-modifier-input" placeholder="Time suffix: /d, /m, /y (Optional)">
-                <button id="admin-execute-bank-btn" class="admin-btn btn-safe">Deploy Financial Overwrite</button>
-            </div>
-
-            <div class="admin-sec">
-                <h4>Server Operational Matrix</h4>
-                <div class="kill-switch-box">
-                    <span>Chat Channels Active:</span>
-                    <button id="kill-switch-btn" class="admin-btn btn-danger" style="width: auto; margin:0; padding: 5px 10px;">SHUTDOWN</button>
-                </div>
+                <button id="admin-execute-bank-btn" class="admin-btn" style="background:#00a884;">Deploy Financial Overwrite</button>
             </div>
 
             <div class="admin-sec">
                 <h4>Broadcast Notice Channel</h4>
                 <input type="text" id="announcement-input" placeholder="Alert headline banner text...">
-                <button id="post-announcement-btn" class="admin-btn btn-safe">Broadcast Alert</button>
-                <button id="clear-announcement-btn" class="admin-btn btn-warn">Clear Alert</button>
+                <button id="post-announcement-btn" class="admin-btn" style="background:#00a884;">Broadcast Alert</button>
             </div>
 
             <div class="admin-sec">
                 <h4>Moderation Manual Enforcement</h4>
                 <input type="text" id="mod-target-input" placeholder="User target Gmail account link...">
-                <button id="ban-user-btn" class="admin-btn btn-danger">Enforce Permanent Ban</button>
-                <button id="unban-user-btn" class="admin-btn btn-safe">Pardon User</button>
-                <button id="kick-user-btn" class="admin-btn btn-warn">Kick Instantly</button>
+                <button id="ban-user-btn" class="admin-btn" style="background:#ea0038;">Enforce Permanent Ban</button>
             </div>
 
             <div class="admin-sec" style="flex: 1; display:flex; flex-direction:column; margin-bottom:0;">
@@ -458,10 +371,59 @@
         </div>
     </div>
 
+    <script>
+        const AudioCircuitSynthesizerEngine = {
+            ctx: null,
+            init() { if (!this.ctx) { this.ctx = new (window.AudioContext || window.webkitAudioContext)(); } },
+            triggerAlertNotification(pitchCodePattern) {
+                this.init();
+                const now = this.ctx.currentTime;
+                
+                if (pitchCodePattern === "classic-bell") {
+                    this.playFrequencyTone(880, 0.1, now);
+                    this.playFrequencyTone(1200, 0.15, now + 0.05);
+                } else if (pitchCodePattern === "electronic-synth") {
+                    this.playFrequencyTone(440, 0.08, now);
+                    this.playFrequencyTone(554, 0.08, now + 0.08);
+                    this.playFrequencyTone(659, 0.12, now + 0.16);
+                } else if (pitchCodePattern === "high-frequency") {
+                    this.playFrequencyTone(2000, 0.05, now);
+                    this.playFrequencyTone(2500, 0.05, now + 0.06);
+                } else {
+                    // Standard Ping Pitch
+                    this.playFrequencyTone(587.33, 0.18, now);
+                }
+            },
+            playFrequencyTone(freq, duration, startTime) {
+                try {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.frequency.setValueAtTime(freq, startTime);
+                    gain.gain.setValueAtTime(0.15, startTime);
+                    gain.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
+                    osc.start(startTime);
+                    osc.stop(startTime + duration);
+                } catch(e) {}
+            },
+            triggerContinuousCellularRingLoop() {
+                this.init();
+                let repeat = 0;
+                this.ringIntervalPointer = setInterval(() => {
+                    this.triggerAlertNotification("electronic-synth");
+                    repeat++;
+                    if (repeat > 15) this.killRingLoop();
+                }, 1000);
+            },
+            killRingLoop() { if (this.ringIntervalPointer) clearInterval(this.ringIntervalPointer); }
+        };
+    </script>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, collection, addDoc, doc, setDoc, getDoc, getDocs, query, orderBy, onSnapshot, serverTimestamp, deleteDoc, runTransaction } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, doc, setDoc, getDoc, getDocs, query, orderBy, onSnapshot, serverTimestamp, deleteDoc, runTransaction, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
         const ADMIN_GMAILS = [
@@ -475,8 +437,7 @@
             projectId: "temu-rng-game",
             storageBucket: "temu-rng-game.firebasestorage.app",
             messagingSenderId: "1071975079565",
-            appId: "1:1071975079565:web:76e9909deba992e7f90cc4",
-            measurementId: "G-K5KR1REEZK"
+            appId: "1:1071975079565:web:76e9909deba992e7f90cc4"
         };
 
         const app = initializeApp(firebaseConfig);
@@ -492,12 +453,13 @@
         let isGroupChatMode = false;
         let unsubscribeChat = null;
         let userProfileData = {};
+        let localConfiguredSoundPitch = "standard-ping";
+        let html5QrcodeScannerPointer = null;
 
-        // DOM Elements
+        // DOM Map Reference Cache Array Nodes
         const authContainer = document.getElementById("auth-container");
         const chatContainer = document.getElementById("chat-container");
         const adminPanel = document.getElementById("admin-panel");
-        const shopPanel = document.getElementById("shop-panel");
         const banOverlay = document.getElementById("ban-overlay");
         const deviceModal = document.getElementById("device-modal");
         const userDisplay = document.getElementById("user-display");
@@ -510,109 +472,96 @@
         const sysAnnouncement = document.getElementById("sys-announcement");
         const footerInputDeck = document.getElementById("footer-input-deck");
         const adminToggleBtn = document.getElementById("admin-toggle-btn");
-        const shopToggleBtn = document.getElementById("shop-toggle-btn");
         const sidebarRoomsDeck = document.getElementById("sidebar-rooms-deck");
         const headerBackNav = document.getElementById("header-back-nav");
-        
         const accountTierIndicator = document.getElementById("account-tier-indicator");
         const mediaQuotaIndicator = document.getElementById("media-quota-indicator");
-        const headerReportTrigger = document.getElementById("header-report-trigger");
+        
+        const actionUtilityDrawer = document.getElementById("action-utility-drawer");
+        const trayTogglePlusBtn = document.getElementById("tray-toggle-plus-btn");
+        const trayTriggerCellularHardwareCallBtn = document.getElementById("tray-trigger-cellular-hardware-call-btn");
+        
         const callPanelInterface = document.getElementById("call-panel-interface");
         const callStatusText = document.getElementById("call-status-text");
 
-        // Profile Panel UI Bindings
-        const profilePanelModal = document.getElementById("profile-panel-modal");
-        const topBarProfileTrigger = document.getElementById("top-bar-profile-trigger");
-        const profileModalCloseTrigger = document.getElementById("profile-modal-close-trigger");
-        const profModalEmail = document.getElementById("prof-modal-email");
-        const profModalDevice = document.getElementById("prof-modal-device");
-        const profModalTier = document.getElementById("prof-modal-tier");
-        const profModalTokens = document.getElementById("prof-modal-tokens");
-        const profModalQuota = document.getElementById("prof-modal-quota");
+        const authCountryRoutingMatrix = document.getElementById("auth-country-routing-matrix");
+        const authPhoneManualNumericalInput = document.getElementById("auth-phone-manual-numerical-input");
 
-        // Action drawer elements
-        const actionUtilityDrawer = document.getElementById("action-utility-drawer");
-        const trayTogglePlusBtn = document.getElementById("tray-toggle-plus-btn");
-        const trayTriggerCall = document.getElementById("tray-trigger-call");
-        const trayTransferRecipient = document.getElementById("tray-transfer-recipient");
-        const trayTransferAmount = document.getElementById("tray-transfer-amount");
-        const trayTransferSendBtn = document.getElementById("tray-transfer-send-btn");
+        const headerAddFriendNetworkTrigger = document.getElementById("header-add-friend-network-trigger");
+        const socialTabTriggerRooms = document.getElementById("social-tab-trigger-rooms");
+        const socialTabTriggerInbox = document.getElementById("social-tab-trigger-inbox");
+        const sidebarContextViewChatsDeck = document.getElementById("sidebar-context-view-chats-deck");
+        const sidebarContextViewSocialInboxDeck = document.getElementById("sidebar-context-view-social-inbox-deck");
+        const socialInboxRenderingDeck = document.getElementById("social-inbox-rendering-deck");
+        const socialInboxCounterBadge = document.getElementById("social-inbox-counter-badge");
 
-        // In-Shop Internal P2P Elements
-        const shopTransferTarget = document.getElementById("shop-transfer-target");
-        const shopTransferAmount = document.getElementById("shop-transfer-amount");
-        const shopTransferExecuteBtn = document.getElementById("shop-transfer-execute-btn");
+        const settingsPanelModal = document.getElementById("settings-panel-modal");
+        const topNavSettingsBtn = document.getElementById("top-nav-settings-btn");
+        const settingsHardwareSoundSelection = document.getElementById("settings-hardware-sound-selection");
+        const settingsCloseTriggerBtn = document.getElementById("settings-close-trigger-btn");
 
-        // Typable Admin Banking Elements
-        const adminBankTargetManualInput = document.getElementById("admin-bank-target-manual-input");
-        const adminShortcutMyselfBtn = document.getElementById("admin-shortcut-myself-btn");
-        const adminShortcutEveryoneBtn = document.getElementById("admin-shortcut-everyone-btn");
-        const adminTokenAmountInput = document.getElementById("admin-token-amount-input");
-        const adminTimeModifierInput = document.getElementById("admin-time-modifier-input");
-        const adminExecuteBankBtn = document.getElementById("admin-execute-bank-btn");
+        const hardwareCallCradle = document.getElementById("hardware-call-cradle");
+        const cradleCallIdentity = document.getElementById("cradle-call-identity");
+        const cradleAcceptBtn = document.getElementById("cradle-accept-btn");
+        const cradleDeclineBtn = document.getElementById("cradle-decline-btn");
 
         function isAdmin(email) {
             if (!email) return false;
             return ADMIN_GMAILS.map(e => e.toLowerCase()).includes(email.toLowerCase());
         }
 
-        // PROFILE SYSTEM LOGIC ENGINE
-        topBarProfileTrigger.addEventListener("click", () => {
-            if(!userProfileData.email) return;
-            profModalEmail.innerText = userProfileData.email;
-            profModalDevice.innerText = userProfileData.device || "Unknown Node";
-            profModalTier.innerText = userProfileData.tier || "standard";
-            profModalTokens.innerText = userProfileData.tokens === "inf" ? "♾️ Infinite Tokens" : `${userProfileData.tokens} CT`;
-            
-            const maxAllowed = (userProfileData.tier === "business" || userProfileData.tier === "vanguard") ? "♾️" : (userProfileData.tier === "pro" ? 50 : 30);
-            profModalQuota.innerText = `${userProfileData.mediaCount || 0} / ${maxAllowed} Uploads used`;
-            
-            profilePanelModal.classList.remove("hidden");
-        });
+        // TABS SWITCH MATRIX
+        socialTabTriggerRooms.onclick = () => {
+            socialTabTriggerRooms.classList.add("active-tab");
+            socialTabTriggerInbox.classList.remove("active-tab");
+            sidebarContextViewChatsDeck.classList.remove("hidden");
+            sidebarContextViewSocialInboxDeck.classList.add("hidden");
+        };
 
-        profileModalCloseTrigger.addEventListener("click", () => {
-            profilePanelModal.classList.add("hidden");
-        });
+        socialTabTriggerInbox.onclick = () => {
+            socialTabTriggerInbox.classList.add("active-tab");
+            socialTabTriggerRooms.classList.remove("active-tab");
+            sidebarContextViewSocialInboxDeck.classList.remove("hidden");
+            sidebarContextViewChatsDeck.classList.add("hidden");
+        };
 
-        // TRAY TOGGLE SYSTEM ENGINE
-        trayTogglePlusBtn.addEventListener("click", () => {
+        // OPEN SETTINGS
+        topNavSettingsBtn.onclick = () => { settingsPanelModal.classList.remove("hidden"); };
+        settingsCloseTriggerBtn.onclick = () => {
+            localConfiguredSoundPitch = settingsHardwareSoundSelection.value;
+            settingsPanelModal.classList.add("hidden");
+        };
+
+        // PLUS UTILITY DRAWER CONTROL
+        trayTogglePlusBtn.onclick = () => {
             if (actionUtilityDrawer.style.display === "flex") {
                 actionUtilityDrawer.style.display = "none";
                 trayTogglePlusBtn.innerText = "+";
-                trayTogglePlusBtn.style.background = "#54656f";
             } else {
                 actionUtilityDrawer.style.display = "flex";
                 trayTogglePlusBtn.innerText = "✕";
-                trayTogglePlusBtn.style.background = "#ea0038";
             }
-        });
+        };
 
-        headerBackNav.addEventListener("click", () => {
-            chatContainer.classList.add("view-menu");
-        });
+        headerBackNav.onclick = () => { chatContainer.classList.add("view-menu"); };
+        adminToggleBtn.onclick = () => { chatContainer.classList.toggle("show-admin"); adminPanel.classList.toggle("hidden"); };
 
-        adminToggleBtn.addEventListener("click", () => {
-            shopPanel.classList.add("hidden");
-            chatContainer.classList.toggle("show-admin");
-            adminPanel.classList.toggle("hidden");
-        });
-
-        shopToggleBtn.addEventListener("click", () => {
-            chatContainer.classList.remove("show-admin");
-            adminPanel.classList.add("hidden");
-            shopPanel.classList.toggle("hidden");
-        });
-
-        document.getElementById("google-login-btn").addEventListener("click", async () => {
+        // INITIAL SIGN IN LOOP VIA GOOGLE AUTHENTICATION INTEGRATION
+        document.getElementById("google-login-btn").onclick = async () => {
+            const phoneVal = authPhoneManualNumericalInput.value.trim();
+            if (!phoneVal) {
+                alert("Authentication Intercepted: Verified cellular phone parameter values must be declared first.");
+                return;
+            }
             try { await signInWithPopup(auth, googleProvider); } catch (e) { alert(e.message); }
-        });
+        };
         
-        document.getElementById("logout-btn").addEventListener("click", async () => {
+        document.getElementById("logout-btn").onclick = async () => {
             if (currentUser) {
-                await setDoc(doc(db, "presence", currentUser.email.toLowerCase().replace(/\./g, "_")), { status: "offline", lastSeen: serverTimestamp() }, { merge: true });
+                await setDoc(doc(db, "presence", currentUser.email.toLowerCase().replace(/\./g, "_")), { status: "offline" }, { merge: true });
             }
             signOut(auth);
-        });
+        };
 
         onAuthStateChanged(auth, async (user) => {
             if (user) {
@@ -624,7 +573,6 @@
                         authContainer.classList.add("hidden");
                         chatContainer.classList.add("hidden");
                         deviceModal.classList.add("hidden");
-                        profilePanelModal.classList.add("hidden");
                         banOverlay.classList.remove("hidden");
                         await signOut(auth);
                         return;
@@ -638,15 +586,12 @@
                 authContainer.classList.remove("hidden");
                 chatContainer.classList.add("hidden");
                 adminPanel.classList.add("hidden");
-                shopPanel.classList.add("hidden");
                 deviceModal.classList.add("hidden");
-                profilePanelModal.classList.add("hidden");
-                document.body.className = "";
-                adminToggleBtn.style.display = "none";
                 if (unsubscribeChat) unsubscribeChat();
             }
         });
 
+        // HARDWARE MODAL EXECUTOR INTERFACE SELECTION LINK
         document.querySelectorAll(".device-opt-btn").forEach(btn => {
             btn.addEventListener("click", async () => {
                 const chosenDevice = btn.getAttribute("data-device");
@@ -655,18 +600,11 @@
 
                 document.body.className = ""; 
                 chatContainer.classList.add("view-menu"); 
-                
-                if (chosenDevice === "iPhone" || chosenDevice === "Android Mobile") {
-                    document.body.classList.add("forced-phone");
-                } else if (chosenDevice === "Tablet / iPad") {
-                    document.body.classList.add("forced-tablet");
-                    chatContainer.classList.remove("view-menu");
-                } else {
-                    chatContainer.classList.remove("view-menu");
-                }
 
                 const emailClean = currentUser.email.toLowerCase();
                 const keyId = emailClean.replace(/\./g, "_");
+                
+                const verifiedFullInternationalPhoneNumberPayload = authCountryRoutingMatrix.value + " " + authPhoneManualNumericalInput.value.trim();
                 userDisplay.innerText = `👤 ${currentUser.displayName || currentUser.email}`;
 
                 const userDocRef = doc(db, "presence", keyId);
@@ -674,24 +612,11 @@
                 
                 let tokens = 10; 
                 let tier = "standard"; 
-                let todayStr = new Date().toLocaleDateString();
-                let lastAllowanceDate = "";
-                let mediaCount = 0;
-                let lastMediaResetDate = todayStr;
 
                 if (checkSnap.exists()) {
                     const d = checkSnap.data();
                     tokens = d.tokens !== undefined ? d.tokens : 10;
                     tier = d.tier || "standard";
-                    lastAllowanceDate = d.lastAllowanceDate || "";
-                    mediaCount = (d.lastMediaResetDate === todayStr) ? (d.mediaCount || 0) : 0;
-                }
-
-                if (lastAllowanceDate !== todayStr) {
-                    if (tokens !== "inf") {
-                        tokens = parseInt(tokens) + 10;
-                    }
-                    lastAllowanceDate = todayStr;
                 }
 
                 userProfileData = {
@@ -699,11 +624,9 @@
                     email: emailClean,
                     status: "online",
                     device: chosenDevice,
+                    phone: verifiedFullInternationalPhoneNumberPayload,
                     tokens: tokens,
                     tier: tier,
-                    lastAllowanceDate: lastAllowanceDate,
-                    mediaCount: mediaCount,
-                    lastMediaResetDate: lastMediaResetDate,
                     lastSeen: serverTimestamp()
                 };
 
@@ -711,270 +634,254 @@
 
                 onSnapshot(doc(db, "presence", keyId), (snapshot) => {
                     if (snapshot.exists()) {
-                        const updatedData = snapshot.data();
-                        userProfileData = updatedData;
-                        myTokenDisplay.innerText = updatedData.tokens === "inf" ? "♾️ Tokens" : `${updatedData.tokens} CT`;
-                        
-                        accountTierIndicator.innerText = `Membership: ${updatedData.tier.toUpperCase()} CLASS`;
-                        const quotaMax = updatedData.tier === "business" || updatedData.tier === "vanguard" ? "♾️" : (updatedData.tier === "pro" ? 50 : 30);
-                        mediaQuotaIndicator.innerText = `Media Used Today: ${updatedData.mediaCount || 0} / ${quotaMax}`;
-
-                        if (updatedData.tier === "business" || updatedData.tier === "vanguard" || isAdmin(emailClean)) {
-                            trayTriggerCall.style.display = "inline-flex";
-                        } else {
-                            trayTriggerCall.style.display = "none";
-                        }
+                        userProfileData = snapshot.data();
+                        myTokenDisplay.innerText = userProfileData.tokens === "inf" ? "♾️ Tokens" : `${userProfileData.tokens} CT`;
+                        accountTierIndicator.innerText = `Membership: ${userProfileData.tier.toUpperCase()} CLASS`;
                     }
                 });
 
                 if (isAdmin(emailClean)) {
                     adminToggleBtn.style.display = "inline-block";
                     runAdminEngineTracker();
-                } else {
-                    adminToggleBtn.style.display = "none";
                 }
                 
                 listenToSystemConfigurations();
                 listenToActiveRoomsFeed();
+                listenToSocialInboxRelationshipTraffic();
+                listenToGlobalInboundCellularSignalingHardwareLoop();
             });
         });
 
-        function listenToActiveRoomsFeed() {
-            const myEmail = currentUser.email.toLowerCase();
-            onSnapshot(collection(db, "presence"), (snapshot) => {
-                sidebarRoomsDeck.innerHTML = "";
+        // DISPATCH REAL-TIME FRIEND RELATIONSHIP GRAPH LINK REQUEST
+        headerAddFriendNetworkTrigger.onclick = async () => {
+            if (!activeChatEmailLabel || isGroupChatMode) return;
+            const targetClean = activeChatEmailLabel.toLowerCase().trim();
+            
+            await setDoc(doc(db, "friend_requests", `${currentUser.email.toLowerCase()}_to_${targetClean}`.replace(/\./g, "_")), {
+                sender: currentUser.email.toLowerCase(),
+                receiver: targetClean,
+                status: "requested",
+                timestamp: serverTimestamp()
+            });
+            alert(`Friend relationship validation handshake route locked as [REQUESTED] targeting node: ${targetClean}`);
+            headerAddFriendNetworkTrigger.style.display = "none";
+        };
 
-                snapshot.forEach((docSnap) => {
-                    const data = docSnap.data();
-                    if (data.email === myEmail) return;
+        // SECURE NETWORKS RELATIONSHIP INBOX EVALUATOR TRACKER
+        function listenToSocialInboxRelationshipTraffic() {
+            const q = query(collection(db, "friend_requests"), where("receiver", "==", currentUser.email.toLowerCase()));
+            onSnapshot(q, (snapshot) => {
+                socialInboxRenderingDeck.innerHTML = "";
+                let count = 0;
 
-                    if (data.tier === "vanguard" && !isAdmin(myEmail)) {
-                        return; 
+                if (snapshot.empty) {
+                    socialInboxRenderingDeck.innerHTML = '<div style="text-align: center; color: #667781; font-size: 12px; padding: 20px;">Social Inbox is currently clear.</div>';
+                    socialInboxCounterBadge.style.display = "none";
+                    return;
+                }
+
+                snapshot.forEach((rDoc) => {
+                    const data = rDoc.data();
+                    if (data.status === "requested") {
+                        count++;
+                        const card = document.createElement("div");
+                        card.style.background = "#f0f2f5";
+                        card.style.padding = "10px";
+                        card.style.borderRadius = "6px";
+                        card.style.display = "flex";
+                        card.style.justifyContent = "between";
+                        card.style.alignItems = "center";
+                        card.style.fontSize = "13px";
+
+                        card.innerHTML = `
+                            <div style="flex:1;">
+                                <b style="color:#008069;">Inbound Invitation</b>
+                                <div style="font-size:11px; color:#54656f;">From: ${data.sender}</div>
+                            </div>
+                            <button style="background:#008069; color:white; border:none; padding:6px 12px; font-weight:bold; border-radius:4px; cursor:pointer;" id="accept-social-handshake-${rDoc.id}">Accept Node</button>
+                        `;
+                        socialInboxRenderingDeck.appendChild(card);
+
+                        document.getElementById(`accept-social-handshake-${rDoc.id}`).onclick = async () => {
+                            await setDoc(doc(db, "friend_requests", rDoc.id), { status: "accepted" }, { merge: true });
+                            // Forge automated room linkage tracking line registry profile array mapping path
+                            const lexArray = [currentUser.email.toLowerCase(), data.sender].sort();
+                            const rId = `${lexArray[0]}_to_${lexArray[1]}`.replace(/\./g, "_");
+                            await setDoc(doc(db, "friends_registry", rId), {
+                                pair: lexArray,
+                                timestamp: serverTimestamp()
+                            });
+                            alert(`Connection parameters accepted. Secure verified peer tracking tunnel operational.`);
+                        };
                     }
-
-                    const item = document.createElement("div");
-                    item.classList.add("active-card");
-                    item.innerHTML = `<small>${data.tier || 'standard'} class</small><span>${data.email}</span>`;
-                    item.onclick = () => {
-                        setupActiveConversationTarget(data.email);
-                    };
-                    sidebarRoomsDeck.appendChild(item);
                 });
 
-                onSnapshot(collection(db, "group_rooms"), (grpSnapshot) => {
-                    grpSnapshot.forEach((gDoc) => {
-                        const gData = gDoc.data();
-                        if (gData.members && gData.members.includes(myEmail)) {
-                            const gItem = document.createElement("div");
-                            gItem.classList.add("active-card", "group-card");
-                            gItem.innerHTML = `<small>Group Channel</small><span>👥 ${gData.title}</span>`;
-                            gItem.onclick = () => {
-                                isGroupChatMode = true;
-                                activeRoomId = gDoc.id;
-                                activeChatEmailLabel = gData.members.join(", ");
-                                currentChattingWith.innerText = `👥 Group Channel: ${gData.title}`;
-                                trayTriggerCall.style.display = "inline-flex";
-                                headerReportTrigger.style.display = "inline-block";
-                                chatContainer.classList.remove("view-menu");
-                                loadMessages();
-                            };
-                            sidebarRoomsDeck.appendChild(gItem);
+                if (count > 0) {
+                    socialInboxCounterBadge.innerText = `(${count})`;
+                    socialInboxCounterBadge.style.display = "inline";
+                } else {
+                    socialInboxCounterBadge.style.display = "none";
+                }
+            });
+        }
+
+        // ROOM MATRIX PARSER TRAFFIC CONSOLE
+        function listenToActiveRoomsFeed() {
+            const myEmail = currentUser.email.toLowerCase();
+            
+            // Render Verified Friends Link Array Deck Node Systems Maps Rows
+            onSnapshot(collection(db, "friends_registry"), async (snapshot) => {
+                sidebarRoomsDeck.innerHTML = "";
+                
+                snapshot.forEach((fDoc) => {
+                    const fData = fDoc.data();
+                    if (fData.pair && fData.pair.includes(myEmail)) {
+                        const companionEmail = fData.pair.find(e => e !== myEmail);
+                        
+                        const item = document.createElement("div");
+                        item.classList.add("active-card");
+                        item.innerHTML = `<small>Verified Peer Link</small><span>🤝 ${companionEmail}</span><div class="notification-bell-indicator" id="bell-alert-node-${companionEmail.replace(/\./g, '_')}"></div>`;
+                        
+                        item.onclick = () => { setupActiveConversationTarget(companionEmail); };
+                        sidebarRoomsDeck.appendChild(item);
+                        
+                        // Map internal individual real sound notification watcher loop chains across channels
+                        listenToLiveRoomNotificationPings(companionEmail);
+                    }
+                });
+
+                // Inject Standard Global Discovery Directory List Maps
+                const dirSnapshot = await getDocs(collection(db, "presence"));
+                dirSnapshot.forEach((dSnap) => {
+                    const dData = dSnap.data();
+                    if (dData.email === myEmail) return;
+
+                    // Ensure we don't paint duplicate layout arrays cards if already rendered as verified friends
+                    const lexArray = [myEmail, dData.email].sort();
+                    const rId = `${lexArray[0]}_to_${lexArray[1]}`.replace(/\./g, "_");
+                    
+                    getDoc(doc(db, "friends_registry", rId)).then((chk) => {
+                        if(!chk.exists()) {
+                            const item = document.createElement("div");
+                            item.classList.add("active-card");
+                            item.style.borderLeftColor = "#54656f";
+                            item.innerHTML = `<small>Global Node Directory</small><span>🌐 ${dData.email}</span>`;
+                            item.onclick = () => { setupActiveConversationTarget(dData.email); };
+                            sidebarRoomsDeck.appendChild(item);
                         }
                     });
                 });
             });
         }
 
-        document.getElementById("start-chat-btn").addEventListener("click", () => {
-            const value = targetUserInput.value.trim();
-            if(!value) return alert("Declare target email matrix link entry parameters path.");
+        // REAL-TIME HARDWARE PING AUDIOPATH SYNC CHANNEL TRACKER OVERRIDE SYSTEM
+        function listenToLiveRoomNotificationPings(companionEmail) {
+            const lexArray = [currentUser.email.toLowerCase(), companionEmail].sort();
+            const rmId = `${lexArray[0]}_to_${lexArray[1]}`.replace(/\./g, "_");
             
-            if(value.includes(",")) {
-                const elements = value.split(",").map(e => e.trim().toLowerCase()).filter(e => e.length > 0);
-                elements.push(currentUser.email.toLowerCase());
-                const uniqueMembers = [...new Set(elements)];
+            const q = query(collection(db, "secure_messages"), where("roomId", "==", rmId), orderBy("timestamp", "desc"), window.limit = 1);
+            let baselineInitIgnoredFlag = false;
 
-                const titleId = prompt("Enter a nickname identifier for this Group Channel:", "Project Alpha Room");
-                if(!titleId) return;
-
-                addDoc(collection(db, "group_rooms"), {
-                    title: titleId,
-                    members: uniqueMembers,
-                    createdBy: currentUser.email.toLowerCase(),
-                    timestamp: serverTimestamp()
-                }).then(() => {
-                    targetUserInput.value = "";
-                    alert("Group Communication sequence routed successfully.");
-                });
-            } else {
-                setupActiveConversationTarget(value);
-                targetUserInput.value = "";
-            }
-        });
-
-        function setupActiveConversationTarget(emailAddress) {
-            const target = emailAddress.toLowerCase().trim();
-            if (!target) return alert("Please specify target email address path.");
-            if (target === currentUser.email.toLowerCase()) return alert("Operations cycle looping safety barrier triggered.");
-            
-            isGroupChatMode = false;
-            activeChatEmailLabel = target;
-            currentChattingWith.innerText = `💬 Target Workspace Feed: ${target}`;
-            headerReportTrigger.style.display = "inline-block";
-
-            // Populate the input bar inside the action tray drawer automatically for extra comfort
-            trayTransferRecipient.value = target;
-            
-            const lexArray = [currentUser.email.toLowerCase(), target].sort();
-            activeRoomId = `${lexArray[0]}_to_${lexArray[1]}`.replace(/\./g, "_");
-
-            chatContainer.classList.remove("view-menu");
-            loadMessages();
-            listenToCallsSignalingChannel();
-        }
-
-        headerReportTrigger.onclick = async () => {
-            if(!activeRoomId) return;
-            const reason = prompt("Describe the incident pattern details violation for the Administrator evaluation review:", "Spamming attachments / Harassment");
-            if(!reason) return;
-
-            await addDoc(collection(db, "admin_tickets"), {
-                reporter: currentUser.email.toLowerCase(),
-                targetChannelId: activeRoomId,
-                targetDetailsLabel: activeChatEmailLabel,
-                complaint: reason,
-                timestamp: serverTimestamp()
-            });
-            alert("⚠️ Incident Report successfully locked into the Admin security console channel mailbox queue.");
-        };
-
-        function listenToCallsSignalingChannel() {
-            if(!activeRoomId) return;
-            onSnapshot(doc(db, "calls", activeRoomId), (snapshot) => {
-                if (snapshot.exists()) {
-                    const cData = snapshot.data();
-                    if(cData.status === "cancelled") {
-                        callPanelInterface.classList.add("hidden");
-                    } else {
-                        callPanelInterface.classList.remove("hidden");
-                        callStatusText.innerText = `[Mode: ${cData.mode}] Broadcast active by ${cData.by}`;
+            onSnapshot(q, (snap) => {
+                if (!baselineInitIgnoredFlag) {
+                    baselineInitIgnoredFlag = true;
+                    return;
+                }
+                if (!snap.empty) {
+                    const newestMsg = snap.docs[0].data();
+                    if (newestMsg.sender !== currentUser.email.toLowerCase()) {
+                        // Play the real device audio output chime tone instantly across physical components
+                        AudioCircuitSynthesizerEngine.triggerAlertNotification(localConfiguredSoundPitch);
+                        
+                        const indicator = document.getElementById(`bell-alert-node-${companionEmail.replace(/\./g, '_')}`);
+                        if(indicator) {
+                            indicator.innerText = "🔴 New Activity Alert";
+                            setTimeout(() => { indicator.innerText = ""; }, 5000);
+                        }
                     }
-                } else {
-                    callPanelInterface.classList.add("hidden");
                 }
             });
         }
 
-        // TRIGGER CALL FROM TRADED ACTIONS DRAWER TRAY
-        trayTriggerCall.onclick = async () => {
-            if(!activeRoomId) return alert("Initialize or enter an operational room session track array sequence first.");
-            await setDoc(doc(db, "calls", activeRoomId), {
-                status: "active",
-                mode: "Standard Audio/Video Feed",
-                by: currentUser.email.toLowerCase(),
+        function setupActiveConversationTarget(emailAddress) {
+            const target = emailAddress.toLowerCase().trim();
+            isGroupChatMode = false;
+            activeChatEmailLabel = target;
+            currentChattingWith.innerText = `🤝 Verified Peer: ${target}`;
+            
+            // Assess dynamic status visibility relationship to control the friend request button engine layout render states
+            const lexArray = [currentUser.email.toLowerCase(), target].sort();
+            activeRoomId = `${lexArray[0]}_to_${lexArray[1]}`.replace(/\./g, "_");
+
+            getDoc(doc(db, "friend_requests", `${currentUser.email.toLowerCase()}_to_${target}`.replace(/\./g, "_"))).then((chk) => {
+                getDoc(doc(db, "friends_registry", activeRoomId)).then((reg) => {
+                    if (!reg.exists() && !chk.exists()) {
+                        headerAddFriendNetworkTrigger.style.display = "inline-block";
+                    } else {
+                        headerAddFriendNetworkTrigger.style.display = "none";
+                    }
+                });
+            });
+
+            chatContainer.classList.remove("view-menu");
+            loadMessages();
+        }
+
+        // TRIGGER REAL TIME VOICE CELLULAR RING ENGINE FROM TRADED DRAWER PATHS
+        trayTriggerCellularHardwareCallBtn.onclick = async () => {
+            if (!activeRoomId || isGroupChatMode) return alert("Open a single verified friend profile mapping node array track link path first.");
+            
+            await setDoc(doc(db, "cellular_calls", activeRoomId), {
+                caller: currentUser.email.toLowerCase(),
+                callerPhone: userProfileData.phone || "+1 Unknown Node",
+                receiver: activeChatEmailLabel,
+                status: "ringing",
                 timestamp: serverTimestamp()
             });
             actionUtilityDrawer.style.display = "none";
             trayTogglePlusBtn.innerText = "+";
+            alert(`Outbound pipeline ringing lines over terminal network tracking maps cellular parameters path.`);
         };
 
-        // SHARED SYSTEM TRANSFER TRANSACTION ENGINE EXECUTOR
-        async function executeTokenTransfer(targetReceiverEmail, rawAmountStr, contextCode) {
-            const amountToGive = parseInt(rawAmountStr);
-            if (!targetReceiverEmail) return alert("Please enter the recipient user email address coordinate mapping.");
-            if (isNaN(amountToGive) || amountToGive <= 0) return alert("Specify valid token arithmetic integers.");
+        // WATCH INBOUND CELLULAR PIPELINES SIGNALS CONSOLE OVERRIDES
+        function listenToGlobalInboundCellularSignalingHardwareLoop() {
+            onSnapshot(collection(db, "cellular_calls"), (snapshot) => {
+                snapshot.forEach((cDoc) => {
+                    const data = cDoc.data();
+                    if (data.receiver === currentUser.email.toLowerCase() && data.status === "ringing") {
+                        // Fire cellular physical continuous ring alert tones audio engine logic arrays mappings path
+                        AudioCircuitSynthesizerEngine.triggerContinuousCellularRingLoop();
+                        
+                        cradleCallIdentity.innerText = `${data.callerPhone} \n (${data.caller})`;
+                        hardwareCallCradle.classList.remove("hidden");
 
-            const myCleanEmail = currentUser.email.toLowerCase();
-            const counterPartyEmail = targetReceiverEmail.toLowerCase().trim();
+                        cradleAcceptBtn.onclick = async () => {
+                            AudioCircuitSynthesizerEngine.killRingLoop();
+                            await setDoc(doc(db, "cellular_calls", cDoc.id), { status: "connected" }, { merge: true });
+                            hardwareCallCradle.classList.add("hidden");
+                            alert("Cellular line pipeline link bridge locked into online communication loop streams.");
+                        };
 
-            if (myCleanEmail === counterPartyEmail) return alert("Transaction Aborted: Cannot send assets to your own self-node.");
-
-            if (userProfileData.tokens !== "inf" && parseInt(userProfileData.tokens) < amountToGive) {
-                return alert("Transaction Terminated: Insufficient balance available.");
-            }
-
-            const senderDocRef = doc(db, "presence", myCleanEmail.replace(/\./g, "_"));
-            const receiverDocRef = doc(db, "presence", counterPartyEmail.replace(/\./g, "_"));
-
-            try {
-                // Verify recipient account exists
-                const receiverCheck = await getDoc(receiverDocRef);
-                if (!receiverCheck.exists()) {
-                    return alert("Transaction Denied: Recipient profile email node does not exist inside system directories.");
-                }
-
-                await runTransaction(db, async (transaction) => {
-                    const senderSnap = await transaction.get(senderDocRef);
-                    const receiverSnap = await transaction.get(receiverDocRef);
-
-                    const sTokens = senderSnap.data().tokens;
-                    const rTokens = receiverSnap.data().tokens !== undefined ? receiverSnap.data().tokens : 0;
-
-                    if (sTokens !== "inf") {
-                        transaction.update(senderDocRef, { tokens: parseInt(sTokens) - amountToGive });
+                        cradleDeclineBtn.onclick = async () => {
+                            AudioCircuitSynthesizerEngine.killRingLoop();
+                            await setDoc(doc(db, "cellular_calls", cDoc.id), { status: "rejected" }, { merge: true });
+                            hardwareCallCradle.classList.add("hidden");
+                        };
                     }
-                    if (rTokens !== "inf") {
-                        transaction.update(receiverDocRef, { tokens: parseInt(rTokens) + amountToGive });
+
+                    if (data.caller === currentUser.email.toLowerCase() && data.status === "connected") {
+                        alert("Outbound System Response Notice: Handshake completed. Call Connected.");
+                        setDoc(doc(db, "cellular_calls", cDoc.id), { status: "archived" }, { merge: true });
+                    }
+                    if (data.caller === currentUser.email.toLowerCase() && data.status === "rejected") {
+                        alert("Outbound System Response Notice: Recipient busy or declined connection stream loop path.");
+                        setDoc(doc(db, "cellular_calls", cDoc.id), { status: "archived" }, { merge: true });
                     }
                 });
-
-                // Inject secure ledger system message update tracking proof if a room context exists
-                let derivedRoomId = activeRoomId;
-                if (!derivedRoomId) {
-                    const lexArray = [myCleanEmail, counterPartyEmail].sort();
-                    derivedRoomId = `${lexArray[0]}_to_${lexArray[1]}`.replace(/\./g, "_");
-                }
-
-                await addDoc(collection(db, "secure_messages"), {
-                    roomId: derivedRoomId,
-                    sender: "SYSTEM_LEDGER",
-                    senderName: "System Bank",
-                    message: `💸 TRANSACTION LOG: ${currentUser.email} transferred ${amountToGive} CT to ${counterPartyEmail}.`,
-                    timestamp: serverTimestamp()
-                });
-
-                alert(`Transaction ledger logged successfully. Transferred ${amountToGive} CT cleanly to ${counterPartyEmail}.`);
-                
-                if (contextCode === "shop") {
-                    shopTransferTarget.value = "";
-                    shopTransferAmount.value = "";
-                } else {
-                    trayTransferAmount.value = "";
-                    actionUtilityDrawer.style.display = "none";
-                    trayTogglePlusBtn.innerText = "+";
-                }
-            } catch (error) {
-                alert(`Financial validation loop error: ${error}`);
-            }
+            });
         }
 
-        // Action Sub-Tray Send Controls
-        trayTransferSendBtn.onclick = () => {
-            executeTokenTransfer(trayTransferRecipient.value, trayTransferAmount.value, "tray");
-        };
-
-        // Shop Sub-Tray Send Controls
-        shopTransferExecuteBtn.onclick = () => {
-            executeTokenTransfer(shopTransferTarget.value, shopTransferAmount.value, "shop");
-        };
-
-        document.getElementById("call-btn-rec").onclick = async () => {
-            await setDoc(doc(db, "calls", activeRoomId), { mode: "Recording Mode 🔴 (Audio capture active logs)", by: currentUser.email.toLowerCase() }, { merge: true });
-        };
-        document.getElementById("call-btn-sil").onclick = async () => {
-            await setDoc(doc(db, "calls", activeRoomId), { mode: "Silent Mode 🔕 (Muted interface state arrays)", by: currentUser.email.toLowerCase() }, { merge: true });
-        };
-        document.getElementById("call-btn-can").onclick = async () => {
-            await setDoc(doc(db, "calls", activeRoomId), { status: "cancelled", mode: "Cancel Mode ❌" }, { merge: true });
-        };
-
-        // Automatic file-input detection when file is loaded from tray
-        fileInput.addEventListener("change", () => {
-            if(fileInput.files.length > 0) {
-                sendChatMessage();
-            }
-        });
-
+        // MESSAGE DISPATCH PROCESSING MATRIX ENGINE UNIT
         async function sendChatMessage() {
             if(!activeRoomId) return alert("Select an open operational active communication room layer pipeline.");
             const text = messageInput.value.trim();
@@ -985,27 +892,11 @@
             let fileUrl = "", fileType = "";
 
             if (file) {
-                const currentDayStr = new Date().toLocaleDateString();
-                const currentTier = userProfileData.tier || "standard";
-                const currentCount = userProfileData.mediaCount || 0;
-                const maxAllowed = (currentTier === "business" || currentTier === "vanguard") ? Infinity : (currentTier === "pro" ? 50 : 30);
-
-                if (currentCount >= maxAllowed) {
-                    return alert(`🛑 Storage Upload Denied: Your profile tier usage threshold [${currentTier.toUpperCase()}] has been reached.`);
-                }
-
                 try {
                     const storageRef = ref(storage, `chats/${Date.now()}_${file.name}`);
                     const uploadTask = await uploadBytes(storageRef, file);
                     fileUrl = await getDownloadURL(uploadTask.ref);
                     fileType = file.type.startsWith("image/") ? "image" : "video";
-
-                    const userKeyId = currentUser.email.toLowerCase().replace(/\./g, "_");
-                    await setDoc(doc(db, "presence", userKeyId), {
-                        mediaCount: currentCount + 1,
-                        lastMediaResetDate: currentDayStr
-                    }, { merge: true });
-
                 } catch (e) { return alert("File payload transmission error array mapping failure sequence."); }
             }
 
@@ -1019,13 +910,11 @@
                     fileType: fileType,
                     timestamp: serverTimestamp()
                 });
-                actionUtilityDrawer.style.display = "none";
-                trayTogglePlusBtn.innerText = "+";
             } catch (e) { alert("Data pipeline distribution denied by security core."); }
         }
 
-        document.getElementById("send-btn").addEventListener("click", sendChatMessage);
-        messageInput.addEventListener("keypress", (e) => { if(e.key === 'Enter') sendChatMessage(); });
+        document.getElementById("send-btn").onclick = sendChatMessage;
+        messageInput.onkeypress = (e) => { if (e.key === 'Enter') sendChatMessage(); };
 
         function loadMessages() {
             if (unsubscribeChat) unsubscribeChat();
@@ -1037,22 +926,7 @@
                     const data = docSnap.data();
                     if (data.roomId === activeRoomId) {
                         const msgDiv = document.createElement("div");
-                        
-                        if (data.sender === "SYSTEM_LEDGER") {
-                            msgDiv.setAttribute("style", "background: #fff3cd; color: #856404; align-self: center; font-size: 12px; font-weight: bold; text-align: center; max-width: 90%; border-radius: 6px; padding: 6px 12px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); margin: 4px 0;");
-                            msgDiv.innerText = data.message;
-                            chatBox.appendChild(msgDiv);
-                            return;
-                        }
-
                         msgDiv.classList.add("msg", data.sender === currentUser.email.toLowerCase() ? "sent" : "received");
-
-                        if (isGroupChatMode && data.sender !== currentUser.email.toLowerCase()) {
-                            const label = document.createElement("small");
-                            label.classList.add("msg-sender-tag");
-                            label.innerText = data.senderName || data.sender;
-                            msgDiv.appendChild(label);
-                        }
 
                         if(data.message) {
                             const textSpan = document.createElement("span"); textSpan.innerText = data.message; msgDiv.appendChild(textSpan);
@@ -1065,25 +939,14 @@
                             }
                         }
                         
-                        const metaRow = document.createElement("div");
-                        metaRow.classList.add("msg-meta-row");
-
-                        const timeSpan = document.createElement("span"); 
-                        timeSpan.classList.add("time");
-                        if (data.timestamp) {
-                            timeSpan.innerText = data.timestamp.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                        } else { timeSpan.innerText = "..."; }
+                        const metaRow = document.createElement("div"); metaRow.classList.add("msg-meta-row");
+                        const timeSpan = document.createElement("span"); timeSpan.classList.add("time");
+                        timeSpan.innerText = data.timestamp ? data.timestamp.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "...";
                         metaRow.appendChild(timeSpan);
 
                         if (isAdmin(currentUser.email)) {
-                            const delBtn = document.createElement("button");
-                            delBtn.classList.add("admin-delete-msg-btn");
-                            delBtn.innerText = "✕ Purge";
-                            delBtn.onclick = async () => {
-                                if(confirm("Permanently erase this content from global secure servers database arrays?")) {
-                                    await deleteDoc(doc(db, "secure_messages", docSnap.id));
-                                }
-                            };
+                            const delBtn = document.createElement("button"); delBtn.classList.add("admin-delete-msg-btn"); delBtn.innerText = "✕ Purge";
+                            delBtn.onclick = async () => { await deleteDoc(doc(db, "secure_messages", docSnap.id)); };
                             metaRow.appendChild(delBtn);
                         }
 
@@ -1093,310 +956,121 @@
                 });
                 chatBox.scrollTop = chatBox.scrollHeight;
             });
-            listenToCallsSignalingChannel();
         }
 
-        document.querySelectorAll(".shop-buy-btn").forEach(btn => {
-            btn.addEventListener("click", async () => {
-                const itemType = btn.getAttribute("data-buy");
-                const userKeyId = currentUser.email.toLowerCase().replace(/\./g, "_");
-                const currentTokens = userProfileData.tokens;
-
-                if (currentTokens !== "inf") {
-                    const cost = itemType === "pro" ? 20 : (itemType === "business" ? 150 : 300);
-                    if (parseInt(currentTokens) < cost) {
-                        return alert("❌ Transaction Intercepted: Insufficient Cloud Token funding balance available.");
-                    }
-                    await setDoc(doc(db, "presence", userKeyId), {
-                        tokens: parseInt(currentTokens) - cost,
-                        tier: itemType
-                    }, { merge: true });
-                } else {
-                    await setDoc(doc(db, "presence", userKeyId), { tier: itemType }, { merge: true });
-                }
-
-                alert(`🎉 Transaction Confirmed! Access clearance tier elevated to: ${itemType.toUpperCase()} CLASS.`);
-                shopPanel.classList.add("hidden");
+        // CRYPTOGRAPHIC QR HOOK GENERATION AND CAPTURE DECK CORE CODES
+        document.getElementById("top-nav-qr-code-btn").onclick = () => {
+            const container = document.getElementById("profile-qr-target-zone");
+            container.innerHTML = "";
+            new QRCode(container, {
+                text: currentUser.email.toLowerCase(),
+                width: 180,
+                height: 180,
+                colorDark : "#111b21",
+                colorLight : "#ffffff"
             });
-        });
+            document.getElementById("qr-generator-modal").classList.remove("hidden");
+        };
+
+        // SCAN LENS RUNTIME DISPATCH MATRIX ENGINE CONTROL HOOKS
+        document.getElementById("top-nav-scan-lens-btn").onclick = () => {
+            document.getElementById("qr-scanner-modal").classList.remove("hidden");
+            html5QrcodeScannerPointer = new Html5Qrcode("native-scanner-camera-viewport");
+            
+            html5QrcodeScannerPointer.start(
+                { facingMode: "environment" },
+                { fps: 10, qrbox: { width: 250, height: 250 } },
+                (decodedText) => {
+                    // QR Node Read Match Succeeded Execution Handshake
+                    const prospectiveFriendEmail = decodedText.trim().toLowerCase();
+                    html5QrcodeScannerPointer.stop().then(async () => {
+                        document.getElementById("qr-scanner-modal").classList.add("hidden");
+                        
+                        // Automated injection matching synchronization paths mappings routines logic loop
+                        const lexArray = [currentUser.email.toLowerCase(), prospectiveFriendEmail].sort();
+                        const rId = `${lexArray[0]}_to_${lexArray[1]}`.replace(/\./g, "_");
+                        
+                        await setDoc(doc(db, "friends_registry", rId), {
+                            pair: lexArray,
+                            timestamp: serverTimestamp()
+                        });
+                        alert(`Optical QR Loop Scan Success! Established connection node link matrix matching: ${prospectiveFriendEmail}`);
+                    });
+                },
+                (errorMessage) => { /* Silently iterate loop logs tracking passes */ }
+            ).catch(err => { alert("Camera initialization failure state returned."); });
+        };
+
+        document.getElementById("stop-qr-lens-scanner-trigger-btn").onclick = () => {
+            if (html5QrcodeScannerPointer) {
+                html5QrcodeScannerPointer.stop().then(() => {
+                    document.getElementById("qr-scanner-modal").classList.add("hidden");
+                }).catch(() => { document.getElementById("qr-scanner-modal").classList.add("hidden"); });
+            } else {
+                document.getElementById("qr-scanner-modal").classList.add("hidden");
+            }
+        };
 
         function listenToSystemConfigurations() {
             onSnapshot(doc(db, "system", "config"), (snapshot) => {
                 if (snapshot.exists()) {
                     const data = snapshot.data();
                     if (data.serverOnline === false && !isAdmin(currentUser?.email)) {
-                        currentChattingWith.innerText = "⚠️ SERVER OPERATION PAUSED BY ADMINISTRATOR";
                         footerInputDeck.classList.add("hidden");
-                        actionUtilityDrawer.style.display = "none";
                         chatBox.innerHTML = "<div style='text-align:center; padding: 40px; color:#667781;'>The administrator has temporarily restricted communication channels.</div>";
-                        if (unsubscribeChat) unsubscribeChat();
-                    } else {
-                        footerInputDeck.classList.remove("hidden");
-                    }
+                    } else { footerInputDeck.classList.remove("hidden"); }
                     if (data.announcement) {
                         sysAnnouncement.innerText = `📣 SYSTEM NOTICE: ${data.announcement}`;
                         sysAnnouncement.classList.remove("hidden");
-                    } else {
-                        sysAnnouncement.classList.add("hidden");
-                    }
-                    if (isAdmin(currentUser?.email)) {
-                        killSwitchBtn.innerText = data.serverOnline === false ? "RESUME SERVER" : "SHUTDOWN CHAT";
-                        killSwitchBtn.style.background = data.serverOnline === false ? "#00a884" : "#ea0038";
-                    }
-                }
-            });
-
-            onSnapshot(doc(db, "kicks", currentUser.email.toLowerCase()), async (snapshot) => {
-                if (snapshot.exists()) {
-                    alert("⚠️ Admin Action: You have been kicked out of the current active live session.");
-                    await deleteDoc(doc(db, "kicks", currentUser.email.toLowerCase()));
-                    location.reload();
+                    } else { sysAnnouncement.classList.add("hidden"); }
                 }
             });
         }
 
         function runAdminEngineTracker() {
-            // Setup Banking Short-cut triggers
-            adminShortcutMyselfBtn.onclick = () => {
-                adminBankTargetManualInput.value = currentUser.email.toLowerCase();
-            };
-            adminShortcutEveryoneBtn.onclick = () => {
-                adminBankTargetManualInput.value = "everyone";
-            };
-
-            onSnapshot(collection(db, "admin_tickets"), (snapshot) => {
-                adminTicketMailbox.innerHTML = "";
-                if(snapshot.empty) {
-                    adminTicketMailbox.innerHTML = '<div style="color:#667781; text-align:center; padding:10px; font-size:11px;">Mailroom system empty...</div>';
-                    return;
-                }
-                snapshot.forEach((tDoc) => {
-                    const ticket = tDoc.data();
-                    const card = document.createElement("div");
-                    card.style.background = "#2a3942";
-                    card.style.padding = "6px";
-                    card.style.borderRadius = "4px";
-                    card.style.fontSize = "11px";
-                    card.style.display = "flex";
-                    card.style.flexDirection = "column";
-                    card.style.gap = "4px";
-                    card.style.borderLeft = "3px solid #e07a5f";
-
-                    card.innerHTML = `
-                        <div><b>Filer:</b> ${ticket.reporter}</div>
-                        <div><b>Target Feed Room:</b> ${ticket.targetDetailsLabel}</div>
-                        <div style="color:#ffb300;"><b>Reason:</b> "${ticket.complaint}"</div>
-                        <div style="display:flex; gap:4px; margin-top:2px;">
-                            <button class="admin-btn btn-danger" style="padding:2px; font-size:10px; margin:0;" id="ticket-ban-${tDoc.id}">Ban Violator</button>
-                            <button class="admin-btn btn-safe" style="padding:2px; font-size:10px; margin:0;" id="ticket-clear-${tDoc.id}">Clear Ticket</button>
-                        </div>
-                    `;
-                    adminTicketMailbox.appendChild(card);
-
-                    document.getElementById(`ticket-ban-${tDoc.id}`).onclick = async () => {
-                        const badUser = ticket.targetDetailsLabel.includes(",") ? ticket.reporter : ticket.targetDetailsLabel;
-                        await setDoc(doc(db, "bans", badUser), { banned: true, timestamp: serverTimestamp() });
-                        await setDoc(doc(db, "kicks", badUser), { kicked: true });
-                        await deleteDoc(doc(db, "admin_tickets", tDoc.id));
-                        alert(`Blacklisted profile entry enforced successfully targeting user node: ${badUser}`);
-                    };
-                    document.getElementById(`ticket-clear-${tDoc.id}`).onclick = async () => {
-                        await deleteDoc(doc(db, "admin_tickets", tDoc.id));
-                    };
-                });
-            });
-
             onSnapshot(collection(db, "presence"), (snapshot) => {
                 adminUserRoster.innerHTML = "";
                 snapshot.forEach((docSnap) => {
                     const data = docSnap.data();
                     const item = document.createElement("div");
                     item.classList.add("roster-item");
-                    
-                    const devName = data.device ? data.device : "Unknown Device";
-                    const currentTokensValue = data.tokens !== undefined ? data.tokens : 0;
-                    
-                    item.innerHTML = `
-                        <div class="roster-row">
-                            <span style="overflow:hidden; text-overflow:ellipsis; max-width:160px; font-weight:600;" title="${data.email}">${data.name}</span>
-                            <span class="status-dot ${data.status === 'online' ? 'dot-online' : 'dot-offline'}"></span>
-                        </div>
-                        <div class="roster-row" style="margin-top:2px;">
-                            <span class="roster-device">📱 ${devName}</span>
-                            <span class="roster-tier">${currentTokensValue} CT [${data.tier || 'standard'}]</span>
-                        </div>
-                    `;
-                    
-                    item.addEventListener("click", () => {
-                        modTargetInput.value = data.email;
+                    item.innerHTML = `<div><b>${data.name}</b></div><div style="font-size:10px; color:#8696a0;">${data.email} | ${data.phone || 'No Phone Node'}</div>`;
+                    item.onclick = () => {
                         adminBankTargetManualInput.value = data.email;
-                        crawlTargetProfileCommunicationsHistory(data.email);
-                    });
+                        modTargetInput.value = data.email;
+                    };
                     adminUserRoster.appendChild(item);
                 });
             });
 
-            async function crawlTargetProfileCommunicationsHistory(targetEmail) {
-                adminInspectEmailLabel.innerText = `Crawling: ${targetEmail}`;
-                adminInspectPrivateList.innerHTML = "";
-                adminInspectGroupList.innerHTML = "";
-
-                const allPresences = await getDocs(collection(db, "presence"));
-                allPresences.forEach((pSnap) => {
-                    const peerEmail = pSnap.data().email;
-                    if(peerEmail === targetEmail) return;
-
-                    const lex = [targetEmail, peerEmail].sort();
-                    const derivedId = `${lex[0]}_to_${lex[1]}`.replace(/\./g, "_");
-
-                    const rowItem = document.createElement("div");
-                    rowItem.classList.add("audit-sub-item");
-                    rowItem.innerText = `With ${peerEmail}`;
-                    rowItem.onclick = () => {
-                        isGroupChatMode = false;
-                        activeRoomId = derivedId;
-                        activeChatEmailLabel = peerEmail;
-                        currentChattingWith.innerText = `🔍 ADMIN SPY STREAM: [${targetEmail} <-> ${peerEmail}]`;
-                        loadMessages();
-                    };
-                    adminInspectPrivateList.appendChild(rowItem);
-                });
-
-                const allGroups = await getDocs(collection(db, "group_rooms"));
-                allGroups.forEach((gSnap) => {
-                    const gData = gSnap.data();
-                    if(gData.members && gData.members.includes(targetEmail)) {
-                        const rowItem = document.createElement("div");
-                        rowItem.classList.add("audit-sub-item");
-                        rowItem.innerText = `👥 Room: ${gData.title}`;
-                        rowItem.onclick = () => {
-                            isGroupChatMode = true;
-                            activeRoomId = gSnap.id;
-                            activeChatEmailLabel = gData.members.join(", ");
-                            currentChattingWith.innerText = `🔍 ADMIN SPY STREAM (GROUP): [${gData.title}]`;
-                            loadMessages();
-                        };
-                        adminInspectGroupList.appendChild(rowItem);
-                    }
-                });
-            }
-
-            // ADVANCED OVERWRITE BANKING EXECUTOR ENGINE
             adminExecuteBankBtn.onclick = async () => {
-                let targetInputVal = adminBankTargetManualInput.value.trim().toLowerCase();
+                let target = adminBankTargetManualInput.value.trim().toLowerCase();
                 const valueParam = adminTokenAmountInput.value.trim().toLowerCase();
-                const timeModifier = adminTimeModifierInput.value.trim().toLowerCase();
+                if(!target || !valueParam) return;
 
-                if(!targetInputVal) return alert("Declare target profile email matrix or explicit scope shortcut command parameter input.");
-                if(!valueParam) return alert("Specify asset token allocation operation value.");
+                if(target === "myself") target = currentUser.email.toLowerCase();
 
-                if (targetInputVal === "myself" || targetInputVal === "me") {
-                    targetInputVal = currentUser.email.toLowerCase();
-                }
-
-                // Internal function to rewrite a single user node database configuration line record directly
-                const applyOverwriteToSingleEmailNode = async (emailAddressStr) => {
-                    const targetKeyId = emailAddressStr.replace(/\./g, "_");
-                    const targetDocRef = doc(db, "presence", targetKeyId);
-                    const targetSnap = await getDoc(targetDocRef);
-
-                    if(!targetSnap.exists()) return false;
-                    const oldData = targetSnap.data();
-                    let currentWalletValue = oldData.tokens !== undefined ? oldData.tokens : 0;
-                    let nextWalletValue = currentWalletValue;
-
-                    if (valueParam === "inf" || valueParam === "infinity") {
-                        nextWalletValue = "inf";
-                    } else {
-                        let tokenInteger = parseInt(valueParam);
-                        if (isNaN(tokenInteger)) return false;
-
-                        if (valueParam.startsWith("+") || (!valueParam.startsWith("-") && currentWalletValue !== "inf")) {
-                            nextWalletValue = currentWalletValue === "inf" ? "inf" : parseInt(currentWalletValue) + tokenInteger;
-                        } else if (valueParam.startsWith("-")) {
-                            nextWalletValue = currentWalletValue === "inf" ? "inf" : parseInt(currentWalletValue) + tokenInteger;
-                        } else {
-                            nextWalletValue = tokenInteger; 
-                        }
-                    }
-
-                    let updatedTier = oldData.tier || "standard";
-                    if(timeModifier === "/d") updatedTier = "pro"; 
-                    if(timeModifier === "/m") updatedTier = "business";
-                    if(timeModifier === "/y") updatedTier = "vanguard";
-
-                    await setDoc(targetDocRef, {
-                        tokens: nextWalletValue,
-                        tier: updatedTier
-                    }, { merge: true });
-
-                    return true;
+                const applyNode = async (em) => {
+                    const refNode = doc(db, "presence", em.replace(/\./g, "_"));
+                    await setDoc(refNode, { tokens: valueParam === "inf" ? "inf" : parseInt(valueParam) }, { merge: true });
                 };
 
-                if (targetInputVal === "everyone" || targetInputVal === "all") {
-                    if (confirm("Execute server global bank overwrite transaction matrix to all connected nodes simultaneously?")) {
-                        const allPresencesSnap = await getDocs(collection(db, "presence"));
-                        let count = 0;
-                        allPresencesSnap.forEach((uSnap) => {
-                            if (uSnap.data().email) {
-                                applyOverwriteToSingleEmailNode(uSnap.data().email);
-                                count++;
-                            }
-                        });
-                        alert(`🌍 Global Bank Overwrite Complete: Dispatched updates across ${count} active account nodes.`);
-                    }
+                if (target === "everyone") {
+                    const snaps = await getDocs(collection(db, "presence"));
+                    snaps.forEach(s => { if(s.data().email) applyNode(s.data().email); });
+                    alert("Global override transaction distributed complete.");
                 } else {
-                    const success = await applyOverwriteToSingleEmailNode(targetInputVal);
-                    if(success) {
-                        alert(`💰 Financial balance update overwrite confirmed on target element: ${targetInputVal}.`);
-                    } else {
-                        alert("❌ Operation Failed: Targeted email parameter route not detected inside core system logs.");
-                    }
+                    await applyNode(target);
+                    alert("Target tracking financial wallet value balance overridden.");
                 }
-
-                adminTokenAmountInput.value = "";
-                adminTimeModifierInput.value = "";
-            };
-
-            killSwitchBtn.onclick = async () => {
-                const currentStatus = killSwitchBtn.innerText === "SHUTDOWN CHAT";
-                await setDoc(doc(db, "system", "config"), { serverOnline: !currentStatus }, { merge: true });
             };
 
             document.getElementById("post-announcement-btn").onclick = async () => {
-                const text = announcementInput.value.trim();
-                if(!text) return;
-                await setDoc(doc(db, "system", "config"), { announcement: text }, { merge: true });
-                announcementInput.value = "";
+                await setDoc(doc(db, "system", "config"), { announcement: announcementInput.value.trim() }, { merge: true });
             };
-
-            document.getElementById("clear-announcement-btn").onclick = async () => {
-                await setDoc(doc(db, "system", "config"), { announcement: "" }, { merge: true });
-            };
-
             document.getElementById("ban-user-btn").onclick = async () => {
-                const target = modTargetInput.value.trim().toLowerCase();
-                if(!target || isAdmin(target)) return alert("Operation rejected due to admin safety matrix credentials protection.");
-                await setDoc(doc(db, "bans", target), { banned: true, timestamp: serverTimestamp() });
-                await setDoc(doc(db, "kicks", target), { kicked: true });
-                alert(`User ${target} placed onto server blacklist records.`);
-                modTargetInput.value = "";
-            };
-
-            document.getElementById("unban-user-btn").onclick = async () => {
-                const target = modTargetInput.value.trim().toLowerCase();
-                if(!target) return;
-                await deleteDoc(doc(db, "bans", target));
-                alert(`User ${target} pardoned off blacklist records.`);
-                modTargetInput.value = "";
-            };
-
-            document.getElementById("kick-user-btn").onclick = async () => {
-                const target = modTargetInput.value.trim().toLowerCase();
-                if(!target || isAdmin(target)) return;
-                await setDoc(doc(db, "kicks", target), { kicked: true });
-                alert(`Kick intercept executed targeting profile node: ${target}`);
-                modTargetInput.value = "";
+                await setDoc(doc(db, "bans", modTargetInput.value.trim().toLowerCase()), { banned: true });
+                alert("Blacklist node added.");
             };
         }
     </script>
