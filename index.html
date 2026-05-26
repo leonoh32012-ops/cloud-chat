@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Cloud Chat Platform</title>
+    <title>Cloud Chat Platform (Enterprise Edition)</title>
 
     <link rel="icon" type="image/jpeg" href="IMG_7775.jpeg">
     <link rel="apple-touch-icon" href="IMG_7775.jpeg">
 
     <meta property="og:type" content="website">
     <meta property="og:title" content="Cloud Chat Platform">
-    <meta property="og:description" content="Live Chat & Live Voice Platform.">
+    <meta property="og:description" content="Live Chat & Live Voice Platform. Built-in Enterprise Systems Encryption.">
     <meta property="og:image" content="IMG_7776.jpeg">
     <meta property="og:url" content="https://temu-rng-game.web.app">
 
@@ -18,138 +18,234 @@
     <script src="https://unpkg.com/html5-qrcode"></script>
 
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { 
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif; 
-            background-color: #f0f2f5; 
-            height: 100vh; 
+        /* Exhaustive CSS Reset Matrix */
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+        
+        body, html {
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f0f2f5;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #111b21;
+        }
+
+        /* Authentication Setup Layer UI */
+        #auth-container { 
+            background: #ffffff; 
+            width: 100%; 
+            max-width: 440px; 
+            min-height: 520px; 
+            border-radius: 24px; 
+            box-shadow: 0 12px 40px rgba(0,0,0,0.08); 
             display: flex; 
-            justify-content: center; 
-            align-items: center; 
+            flex-direction: column; 
             overflow: hidden; 
+            justify-content: space-between; 
+            padding: 40px; 
+            margin: 20px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1000;
         }
         
-        #auth-container { background: white; width: 100%; max-width: 440px; min-height: 480px; border-radius: 16px; box-shadow: 0 4px 30px rgba(0,0,0,0.06); display: flex; flex-direction: column; overflow: hidden; justify-content: center; align-items: center; padding: 30px; margin: 16px; }
-        .hidden { display: none !important; }
-        
-        /* Auth Setup Forms */
-        .auth-box { text-align: center; width: 100%; }
-        .auth-box h2 { margin-bottom: 8px; color: #008069; font-size: 26px; font-weight: 800; }
-        .auth-box p { color: #667781; margin-bottom: 24px; font-size: 14px; }
-        .phone-form-group { margin-bottom: 20px; text-align: left; width: 100%; }
-        .phone-form-group label { display: block; font-size: 11px; font-weight: bold; color: #54656f; margin-bottom: 6px; text-transform: uppercase; }
-        .phone-row-layout { display: flex; gap: 8px; }
-        .country-select { padding: 12px; border: 1px solid #e1e9eb; border-radius: 8px; background: #f0f2f5; font-size: 14px; max-width: 120px; outline: none; }
-        .phone-input-field { flex: 1; padding: 12px; border: 1px solid #e1e9eb; border-radius: 8px; font-size: 15px; outline: none; }
-        .google-btn { display: inline-flex; align-items: center; justify-content: center; gap: 12px; padding: 14px; background: white; color: #54656f; border: 1px solid #e1e9eb; border-radius: 24px; cursor: pointer; font-size: 15px; font-weight: 600; box-shadow: 0 2px 5px rgba(0,0,0,0.05); width: 100%; margin-top: 10px; }
+        .auth-brand-section { text-align: center; margin-bottom: 20px; }
+        .auth-brand-section h2 { color: #008069; font-size: 28px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 8px; }
+        .auth-brand-section p { color: #667781; font-size: 14px; line-height: 1.5; }
 
-        /* 📱 RESPONSIVE AUTO-FIT GRID LAYOUT FRAMEWORK */
+        .phone-form-group { width: 100%; margin-bottom: 24px; }
+        .phone-form-group label { display: block; font-size: 12px; font-weight: 700; color: #54656f; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .phone-row-layout { display: flex; gap: 10px; }
+        
+        .country-select { padding: 14px; border: 1px solid #e1e9eb; border-radius: 12px; background: #f0f2f5; font-size: 15px; font-weight: 600; max-width: 130px; outline: none; transition: border-color 0.2s; }
+        .country-select:focus { border-color: #00a884; }
+        
+        .phone-input-field { flex: 1; padding: 14px; border: 1px solid #e1e9eb; border-radius: 12px; font-size: 16px; font-weight: 500; outline: none; background: #ffffff; transition: border-color 0.2s; }
+        .phone-input-field:focus { border-color: #00a884; }
+
+        .google-btn { 
+            display: inline-flex; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 12px; 
+            padding: 16px; 
+            background: #ffffff; 
+            color: #111b21; 
+            border: 1px solid #e1e9eb; 
+            border-radius: 28px; 
+            cursor: pointer; 
+            font-size: 16px; 
+            font-weight: 600; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03); 
+            width: 100%; 
+            transition: background-color 0.2s, transform 0.1s; 
+        }
+        .google-btn:hover { background: #f7f9fa; }
+        .google-btn:active { transform: scale(0.98); }
+
+        .hidden { display: none !important; }
+
+        /* 📱 ENTERPRISE-GRADE AUTO-FIT WORKSPACE MATRIX DISPLAY ENGINE */
         #chat-container { 
             width: 100vw; 
             height: 100vh; 
             display: grid; 
-            grid-template-columns: 340px 1fr; 
-            background-color: #fff; 
+            grid-template-columns: 360px 1fr; 
+            background-color: #ffffff; 
             position: relative;
+            overflow: hidden;
         }
-        #chat-container.show-admin { grid-template-columns: 340px 1fr 340px; }
         
-        /* Sidebar Workspace Navigation */
+        /* Layout Mutation Rules for Realtime Dynamic Sub-panels */
+        #chat-container.show-admin { grid-template-columns: 360px 1fr 340px; }
+        
+        /* Workspace Drawer Component Structure */
         .sidebar { 
             background: #ffffff; 
             border-right: 1px solid #e9edef; 
             display: flex; 
             flex-direction: column; 
-            z-index: 100;
+            z-index: 200;
+            height: 100%;
+            overflow: hidden;
         }
-        .sidebar-header { background: #f0f2f5; padding: 14px; display: flex; flex-direction: column; gap: 10px; border-bottom: 1px solid #e9edef; }
-        .profile-identity-bar { display: flex; justify-content: space-between; align-items: center; width: 100%; }
-        #user-display { font-weight: 700; color: #111b21; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .token-badge { background: #e3f2fd; color: #0d47a1; font-size: 11px; padding: 4px 8px; border-radius: 20px; font-weight: bold; }
         
-        .header-action-button-grid { display: flex; gap: 4px; width: 100%; flex-wrap: wrap; }
-        .header-action-button-grid button { flex: 1; min-width: 60px; padding: 6px 2px; font-size: 11px; font-weight: bold; border-radius: 6px; border: none; cursor: pointer; color: white; }
+        .sidebar-header { background: #f0f2f5; padding: 16px; display: flex; flex-direction: column; gap: 12px; border-bottom: 1px solid #e9edef; }
+        .profile-identity-bar { display: flex; justify-content: space-between; align-items: center; width: 100%; gap: 10px; }
+        #user-display { font-weight: 700; color: #111b21; font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .token-badge { background: #e3f2fd; color: #0d47a1; font-size: 11px; padding: 5px 10px; border-radius: 20px; font-weight: bold; white-space: nowrap; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
         
+        .header-action-button-grid { display: flex; gap: 6px; width: 100%; flex-wrap: wrap; }
+        .header-action-button-grid button { flex: 1; min-width: 70px; padding: 8px 4px; font-size: 11px; font-weight: bold; border-radius: 8px; border: none; cursor: pointer; color: #ffffff; transition: opacity 0.2s, transform 0.1s; }
+        .header-action-button-grid button:active { transform: scale(0.97); }
+        
+        /* Unified Button Interface Palettes */
+        .btn-ui-green { background: #008069; }
+        .btn-ui-green:hover { background: #006653; }
+        .btn-ui-orange { background: #ffb300; color: #5d4037 !important; }
+        .btn-ui-orange:hover { background: #e6a100; }
+        .btn-ui-teal { background: #00a884; }
+        .btn-ui-teal:hover { background: #008f70; }
+        .btn-ui-slate { background: #54656f; }
+        .btn-ui-slate:hover { background: #414e56; }
+        .btn-ui-red { background: #ea0038; }
+        .btn-ui-red:hover { background: #cc0031; }
+
+        /* Social Sub-navigation Control Systems */
         .social-nav-tabs { display: flex; background: #f0f2f5; border-bottom: 1px solid #e9edef; }
-        .social-tab-trigger { flex: 1; text-align: center; padding: 12px; font-size: 13px; font-weight: bold; color: #54656f; cursor: pointer; }
-        .social-tab-trigger.active-tab { color: #008069; border-bottom: 3px solid #008069; background: #fff; }
+        .social-tab-trigger { flex: 1; text-align: center; padding: 14px; font-size: 13px; font-weight: 700; color: #54656f; cursor: pointer; transition: background-color 0.2s; user-select: none; }
+        .social-tab-trigger:hover { background-color: #e9edef; }
+        .social-tab-trigger.active-tab { color: #008069; border-bottom: 3px solid #008069; background: #ffffff; }
 
-        .search-area { padding: 12px; background: #fff; border-bottom: 1px solid #e9edef; display: flex; flex-direction: column; gap: 6px; }
-        .search-area input { width: 100%; padding: 10px 14px; border: none; background: #f0f2f5; border-radius: 8px; font-size: 13px; outline: none; }
-        .search-area button { width: 100%; border: none; padding: 10px; border-radius: 8px; font-weight: 600; cursor: pointer; background: #008069; color: white; }
+        /* Search Interface Deck */
+        .search-area { padding: 12px 16px; background: #ffffff; border-bottom: 1px solid #e9edef; display: flex; flex-direction: column; gap: 8px; }
+        .search-area input { width: 100%; padding: 12px 14px; border: 1px solid transparent; background: #f0f2f5; border-radius: 10px; font-size: 14px; outline: none; transition: all 0.2s; }
+        .search-area input:focus { background: #ffffff; border-color: #00a884; box-shadow: 0 0 0 2px rgba(0,168,132,0.1); }
+        .search-area button { width: 100%; border: none; padding: 12px; border-radius: 10px; font-weight: 700; font-size: 14px; cursor: pointer; background: #008069; color: #ffffff; transition: background-color 0.2s; }
         
-        .active-user-list { flex: 1; padding: 12px; background: #fff; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
-        .active-card { background: #f0f2f5; border-left: 4px solid #008069; padding: 12px; border-radius: 0 8px 8px 0; font-size: 13.5px; cursor: pointer; position: relative; }
-        .active-card small { color: #667781; display: block; font-size: 10px; font-weight: bold; text-transform: uppercase; margin-bottom: 2px; }
+        /* Channels Display Stream Deck */
+        .active-user-list { flex: 1; padding: 12px 16px; background: #ffffff; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+        .active-card { background: #f0f2f5; border-left: 4px solid #008069; padding: 14px; border-radius: 0 10px 10px 0; font-size: 14px; font-weight: 600; cursor: pointer; position: relative; transition: transform 0.15s, background-color 0.15s; }
+        .active-card:hover { background: #e9edef; transform: translateX(2px); }
+        .active-card small { color: #667781; display: block; font-size: 10px; font-weight: 800; text-transform: uppercase; margin-bottom: 4px; letter-spacing: 0.5px; }
 
-        /* Main Conversation Hub Window */
+        /* Conversation Thread Container Core Module */
         .main-chat-window { display: flex; flex-direction: column; background: #efeae2; position: relative; height: 100%; overflow: hidden; }
-        .main-chat-window::before { content: ""; position: absolute; top:0; left:0; width:100%; height:100%; background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png'); opacity: 0.04; pointer-events: none; }
+        .main-chat-window::before { content: ""; position: absolute; top:0; left:0; width:100%; height:100%; background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png'); opacity: 0.05; pointer-events: none; z-index: 0; }
         
-        /* 🍔 HAMBURGER INTERACTIVE MENU CONTAINER BLOCK */
-        .main-header { height: 60px; background: #f0f2f5; padding: 0 16px; display: flex; align-items: center; border-bottom: 1px solid #e9edef; z-index: 10; gap: 12px; flex-shrink: 0; }
+        /* 🍔 HAMBURGER INTERACTIVE STRUCTURAL CONTAINER DECK HEADER */
+        .main-header { height: 60px; background: #f0f2f5; padding: 0 20px; display: flex; align-items: center; border-bottom: 1px solid #e9edef; z-index: 10; gap: 16px; flex-shrink: 0; position: relative; }
         
         .hamburger-menu-toggle-trigger {
             display: none;
             background: none;
             border: none;
-            font-size: 26px;
+            font-size: 28px;
             color: #54656f;
             cursor: pointer;
             padding: 4px;
-            z-index: 1000;
+            z-index: 1100;
+            transition: color 0.2s;
         }
+        .hamburger-menu-toggle-trigger:hover { color: #111b21; }
 
-        #current-chatting-with { font-size: 14.5px; color: #111b21; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
-        #chat-box { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; z-index: 1; }
-
-        /* Message Bubbles layout rules */
-        .msg { padding: 8px 14px; border-radius: 8px; max-width: 75%; font-size: 15px; word-break: break-word; display: flex; flex-direction: column; box-shadow: 0 1px 1px rgba(0,0,0,0.05); }
-        .msg.sent { background: #d9fdd3; align-self: flex-end; border-top-right-radius: 0; }
-        .msg.received { background: white; align-self: flex-start; border-top-left-radius: 0; }
-        .msg img, .msg video { max-width: 100%; max-height: 240px; object-fit: contain; border-radius: 6px; margin-top: 4px; }
-        .msg-meta-row { display: flex; justify-content: space-between; align-items: center; gap: 15px; margin-top: 4px; }
-        .time { font-size: 10px; color: #667781; }
-
-        .input-area { padding: 12px 16px; background: #f0f2f5; display: flex; align-items: center; gap: 10px; z-index: 20; border-top: 1px solid #e9edef; }
-        .input-area input[type="text"] { flex: 1; padding: 12px; border: none; background: white; border-radius: 8px; outline: none; font-size: 15px; }
-        .input-area button.send-main-btn { background: #008069; color: white; border: none; padding: 12px 18px; border-radius: 8px; cursor: pointer; font-weight: bold; }
-        .plus-action-trigger { background: #54656f; color: white; border: none; width: 40px; height: 40px; border-radius: 50%; font-size: 20px; cursor: pointer; display: flex; justify-content: center; align-items: center; }
+        #current-chatting-with { font-size: 15px; color: #111b21; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; z-index: 1; }
         
-        .action-tray-drawer { display: none; background: #f0f2f5; border-top: 1px solid #e9edef; padding: 12px; gap: 10px; z-index: 18; }
-        .tray-action-btn { background: white; border: 1px solid #e9edef; padding: 10px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; cursor: pointer; }
+        /* Message Render Hub */
+        .chat-box { flex: 1; padding: 24px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; z-index: 1; position: relative; }
 
-        /* Universal Modals */
-        .universal-modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center; z-index: 15000; backdrop-filter: blur(4px); }
-        .modal-card-widget { background: white; padding: 24px; border-radius: 16px; width: 100%; max-width: 400px; text-align: center; margin: 16px; }
-        .scanner-viewport { width: 100%; height: 240px; background: #000; border-radius: 8px; overflow: hidden; margin-bottom: 12px; }
+        /* Advanced Data Bubble Components Layout Framework */
+        .msg { padding: 10px 16px; border-radius: 12px; max-width: 72%; font-size: 15px; line-height: 1.45; word-break: break-word; display: flex; flex-direction: column; box-shadow: 0 1px 2px rgba(0,0,0,0.08); position: relative; animation: bubblePop 0.2s cubic-bezier(0.1, 0.8, 0.25, 1); }
+        @keyframes bubblePop { from { transform: scale(0.92); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        
+        .msg.sent { background: #d9fdd3; align-self: flex-end; border-top-right-radius: 0; }
+        .msg.received { background: #ffffff; align-self: flex-start; border-top-left-radius: 0; }
+        .msg img, .msg video { max-width: 100%; max-height: 280px; object-fit: contain; border-radius: 8px; margin-top: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .msg-meta-row { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-top: 6px; }
+        .time { font-size: 10px; color: #667781; font-weight: 500; }
+        .admin-delete-msg-btn { background: none; border: none; color: #ea0038; cursor: pointer; font-size: 11px; font-weight: bold; padding: 2px 4px; border-radius: 4px; transition: background-color 0.15s; }
+        .admin-delete-msg-btn:hover { background-color: rgba(234,0,56,0.08); }
 
-        #ban-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #ea0038; color: white; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 99999; text-align: center; font-size: 24px; font-weight: bold; }
-        .admin-panel { background: #202c33; color: #e9edef; border-left: 1px solid #3b4a54; display: flex; flex-direction: column; padding: 15px; overflow-y: auto; }
+        /* Secure Payload Input Architecture Deck */
+        .input-area { padding: 14px 20px; background: #f0f2f5; display: flex; align-items: center; gap: 12px; z-index: 20; border-top: 1px solid #e9edef; position: relative; }
+        .input-area input[type="text"] { flex: 1; padding: 14px 18px; border: 1px solid transparent; background: #ffffff; border-radius: 12px; outline: none; font-size: 15px; font-weight: 500; transition: border-color 0.2s; }
+        .input-area input[type="text"]:focus { border-color: #00a884; }
+        .input-area button.send-main-btn { background: #008069; color: #ffffff; border: none; padding: 14px 24px; border-radius: 12px; cursor: pointer; font-weight: 700; font-size: 15px; transition: background-color 0.2s; }
+        .input-area button.send-main-btn:hover { background: #006653; }
+        
+        .plus-action-trigger { background: #54656f; color: #ffffff; border: none; width: 44px; height: 44px; border-radius: 50%; font-size: 22px; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: background-color 0.2s, transform 0.2s; flex-shrink: 0; }
+        .plus-action-trigger:hover { background: #414e56; }
+        .plus-action-trigger.rotated { transform: rotate(135deg); background: #ea0038; }
+        
+        /* Advanced Extension Attachment Trays */
+        .action-tray-drawer { display: none; background: #f0f2f5; border-top: 1px solid #e9edef; padding: 14px 20px; gap: 12px; z-index: 18; justify-content: flex-start; align-items: center; width: 100%; transition: all 0.2s ease; }
+        .tray-action-btn { background: #ffffff; border: 1px solid #e9edef; padding: 12px 20px; border-radius: 24px; font-size: 13.5px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.02); transition: background-color 0.15s, transform 0.1s; }
+        .tray-action-btn:hover { background: #f7f9fa; }
+        .tray-action-btn:active { transform: scale(0.97); }
 
-        /* Sidebar overlay masking curtain layer */
-        .sidebar-curtain-overlay-mask { display: none; position: absolute; top:0; left:0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.4); z-index: 50; }
+        /* Universal Modals Engine Framework */
+        .universal-modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(17,27,33,0.7); display: flex; justify-content: center; align-items: center; z-index: 15000; backdrop-filter: blur(6px); animation: fadeInOverlay 0.25s ease-out; }
+        @keyframes fadeInOverlay { from { opacity: 0; } to { opacity: 1; } }
+        
+        .modal-card-widget { background: #ffffff; padding: 32px; border-radius: 24px; width: 100%; max-width: 420px; box-shadow: 0 20px 50px rgba(0,0,0,0.3); text-align: center; margin: 20px; animation: modalSlideUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        @keyframes modalSlideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        
+        .scanner-viewport { width: 100%; height: 260px; background: #000000; border-radius: 16px; overflow: hidden; margin-bottom: 16px; position: relative; border: 2px solid #e9edef; }
 
-        /* 🚨 SCREEN AUTO-FIT MEDIA QUERY MATRIX (FITS EVERY DEVICE SIZE NATIVELY) */
-        @media (max-width: 820px) {
+        /* Security Ban Overlay State */
+        #ban-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #ea0038; color: #ffffff; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 999999; text-align: center; padding: 30px; gap: 14px; }
+        #ban-overlay h1 { font-size: 32px; font-weight: 900; letter-spacing: -1px; }
+        #ban-overlay p { font-size: 16px; opacity: 0.9; max-width: 460px; line-height: 1.6; }
+
+        /* Admin Terminal Controls Space */
+        .admin-panel { background: #202c33; color: #e9edef; border-left: 1px solid #3b4a54; display: flex; flex-direction: column; padding: 20px; overflow-y: auto; z-index: 150; }
+        .admin-panel h3 { font-size: 18px; font-weight: 800; color: #00a884; margin-bottom: 16px; padding-bottom: 10px; border-bottom: 1px solid #3b4a54; display: flex; justify-content: space-between; align-items: center; }
+        
+        /* Sidebar Dynamic Background Curtain Overlay Veil */
+        .sidebar-curtain-overlay-mask { display: none; position: absolute; top:0; left:0; width: 100vw; height: 100vh; background: rgba(11,20,26,0.5); z-index: 150; backdrop-filter: blur(2px); animation: fadeInOverlay 0.2s ease; }
+
+        /* 🚨 THE UNIVERSAL RESOLUTION MATRIX AUTO-FIT MEDIA QUERY FRAMEWORK */
+        @media (max-width: 960px) {
             #chat-container { grid-template-columns: 1fr !important; }
             
-            /* Turn sidebar panel layout track into a sliding side overlay container drawer drawer */
+            /* Sidebar transitions into an absolute overlay drawer layout track */
             .sidebar {
                 position: absolute;
                 top: 0;
                 left: 0;
-                width: 290px;
+                width: 310px;
                 height: 100%;
                 transform: translateX(-100%);
-                transition: transform 0.25s ease-out;
-                box-shadow: 4px 0 20px rgba(0,0,0,0.15);
+                transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                box-shadow: 8px 0 28px rgba(11,20,26,0.18);
             }
             
-            /* Expose the real physical Hamburger Menu Trigger Element */
+            /* Enable the native hamburger toggles UI elements */
             .hamburger-menu-toggle-trigger { display: inline-block !important; }
             
-            /* Drawer activation status toggle layouts mapping classes overrides */
+            /* Opened execution mapping state declarations overrides */
             #chat-container.sidebar-drawer-active-open .sidebar {
                 transform: translateX(0);
             }
@@ -157,69 +253,76 @@
                 display: block;
             }
             
-            .msg { max-width: 85%; }
+            .msg { max-width: 82%; }
+            
             #chat-container.show-admin { grid-template-columns: 1fr !important; }
-            .admin-panel { position: absolute; right:0; top:0; height:100%; width:280px; z-index:110; }
+            .admin-panel { position: absolute; right: 0; top: 0; height: 100%; width: 290px; z-index: 300; box-shadow: -8px 0 28px rgba(0,0,0,0.2); }
         }
     </style>
 </head>
 <body>
 
     <div id="ban-overlay" class="hidden">
-        🛑 ACCESS DENIED
-        <p>Your account has been permanently banned from this server.</p>
+        <h1>🛑 SERVICE ACCESS TERMINATED</h1>
+        <p>This credential identifier cluster has been flag-isolated and permanently banned by server administrative security controllers.</p>
     </div>
 
     <div id="hardware-call-cradle" class="universal-modal-overlay hidden">
-        <div class="modal-card-widget" style="background: #111b21; color: white;">
-            <div style="font-size: 40px; margin-bottom: 10px;">📞</div>
-            <h3 style="color: #25d366;">Inbound Cellular Call</h3>
-            <p id="cradle-call-identity" style="font-size: 15px; margin-bottom: 20px;">Connecting Line Stream Parameters...</p>
-            <div style="display: flex; gap: 10px; justify-content: center;">
-                <button id="cradle-accept-btn" style="background: #25d366; border: none; padding: 12px 24px; border-radius: 24px; color: white; font-weight: bold; cursor: pointer;">Answer</button>
-                <button id="cradle-decline-btn" style="background: #ea0038; border: none; padding: 12px 24px; border-radius: 24px; color: white; font-weight: bold; cursor: pointer;">Hang Up</button>
+        <div class="modal-card-widget" style="background: #111b21; color: #ffffff; max-width: 360px;">
+            <div style="font-size: 48px; margin-bottom: 14px; animation: dialPulse 1s infinite alternate;">📞</div>
+            <style>@keyframes dialPulse { from { transform: scale(1); opacity:0.8; } to { transform: scale(1.1); opacity:1; } }</style>
+            <h3 style="color: #25d366; font-size: 20px; font-weight: 800; margin-bottom: 6px;">Inbound Voice Pipeline</h3>
+            <p id="cradle-call-identity" style="font-size: 14px; color: #8696a0; margin-bottom: 26px; line-height: 1.5; word-break: break-all;"></p>
+            <div style="display: flex; gap: 12px; justify-content: center; width: 100%;">
+                <button id="cradle-accept-btn" style="flex: 1; background: #25d366; border: none; padding: 14px; border-radius: 14px; color: white; font-weight: bold; font-size: 15px; cursor: pointer;">Connect</button>
+                <button id="cradle-decline-btn" style="flex: 1; background: #ea0038; border: none; padding: 14px; border-radius: 14px; color: white; font-weight: bold; font-size: 15px; cursor: pointer;">Reject</button>
             </div>
         </div>
     </div>
 
     <div id="qr-generator-modal" class="universal-modal-overlay hidden">
         <div class="modal-card-widget">
-            <h3>Your Profile QR Node</h3>
-            <p style="color: #667781; font-size: 12px; margin-bottom: 12px;">Let a peer scan this to instantly complete handshake linkage tracking pairs.</p>
-            <div id="profile-qr-target-zone" style="display:flex; justify-content:center; margin:15px 0;"></div>
-            <button class="btn-ui-slate" style="padding: 10px; border: none; border-radius: 6px; font-weight: bold; width: 100%; color: white; cursor: pointer;" onclick="document.getElementById('qr-generator-modal').classList.add('hidden')">Close Node</button>
+            <h3 style="font-size: 20px; font-weight: 800; margin-bottom: 6px;">Handshake Profile QR Node</h3>
+            <p style="color: #667781; font-size: 13px; margin-bottom: 20px;">Let a peer capture this code matrix with their optical device scanner to bridge channels.</p>
+            <div id="profile-qr-target-zone" style="display: flex; justify-content: center; align-items: center; margin: 24px 0; padding: 10px; background: #ffffff;"></div>
+            <button class="btn-ui-slate" style="padding: 14px; border: none; border-radius: 12px; font-weight: bold; font-size: 15px; width: 100%; color: white; cursor: pointer;" id="close-qr-gen-btn">Terminate Node Window</button>
         </div>
     </div>
 
     <div id="qr-scanner-modal" class="universal-modal-overlay hidden">
         <div class="modal-card-widget">
-            <h3>Native Optical Camera Lens Scanner</h3>
+            <h3 style="font-size: 20px; font-weight: 800; margin-bottom: 6px;">Optical Core Lens Capture</h3>
+            <p style="color: #667781; font-size: 13px; margin-bottom: 16px;">Center a peer profile QR matrix inside the viewfinder tracking perimeter.</p>
             <div id="native-scanner-camera-viewport" class="scanner-viewport"></div>
-            <button class="btn-ui-red" id="stop-qr-lens-scanner-trigger-btn" style="padding: 10px; border: none; border-radius: 6px; font-weight: bold; width: 100%; cursor: pointer; color:white;">Kill Scanner Stream</button>
+            <button class="btn-ui-red" id="stop-qr-lens-scanner-trigger-btn" style="padding: 14px; border: none; border-radius: 12px; font-weight: bold; font-size: 15px; width: 100%; cursor: pointer; color: white;">Kill Viewfinder Stream</button>
         </div>
     </div>
 
     <div id="auth-container">
-        <div class="auth-box">
-            <h2>Cloud Chat Platform</h2>
-            <p>Register profile identity parameters to initialize secure alignment feeds.</p>
+        <div class="auth-box" style="width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: space-between;">
+            <div class="auth-brand-section">
+                <h2>Cloud Chat Platform</h2>
+                <p>Register international telecommunication parameters to link secure hardware keys.</p>
+            </div>
             
-            <div class="phone-form-group">
-                <label>International Mobile Endpoint Destination</label>
-                <div class="phone-row-layout">
-                    <select id="auth-country-routing-matrix" class="country-select">
-                        <option value="+82">🇰🇷 KR (+82)</option>
-                        <option value="+1">🇺🇸 US (+1)</option>
-                        <option value="+44">🇬🇧 UK (+44)</option>
-                        <option value="+886">🇹🇼 TW (+886)</option>
-                        <option value="+81">🇯🇵 JP (+81)</option>
-                    </select>
-                    <input type="text" id="auth-phone-manual-numerical-input" class="phone-input-field" placeholder="(010) 1234-5678">
+            <div style="flex: 1; display: flex; flex-direction: column; justify-content: center; width: 100%;">
+                <div class="phone-form-group">
+                    <label>Mobile Core Destination Routing Map</label>
+                    <div class="phone-row-layout">
+                        <select id="auth-country-routing-matrix" class="country-select">
+                            <option value="+82">🇰🇷 KR (+82)</option>
+                            <option value="+1">🇺🇸 US (+1)</option>
+                            <option value="+44">🇬🇧 UK (+44)</option>
+                            <option value="+886">🇹🇼 TW (+886)</option>
+                            <option value="+81">🇯🇵 JP (+81)</option>
+                        </select>
+                        <input type="text" id="auth-phone-manual-numerical-input" class="phone-input-field" placeholder="010-1234-5678">
+                    </div>
                 </div>
             </div>
 
             <button class="google-btn" id="google-login-btn">
-                <img style="width:20px; height:20px;" src="https://fonts.gstatic.com/s/i/productlogos/googleg/v6/web-24dp/logo_googleg_color_24dp.png" alt="Google">
+                <img style="width: 22px; height: 22px;" src="https://fonts.gstatic.com/s/i/productlogos/googleg/v6/web-24dp/logo_googleg_color_24dp.png" alt="Google Token Integration Core System Setup">
                 Synchronize Account with Google
             </button>
         </div>
@@ -232,67 +335,69 @@
         <div class="sidebar" id="app-sidebar-element">
             <div class="sidebar-header">
                 <div class="profile-identity-bar">
-                    <span id="user-display">Connecting Profile Line Node...</span>
-                    <span class="token-badge" id="my-token-display">0 CT</span>
+                    <span id="user-display">Loading Identity Node Profile Stream...</span>
+                    <span class="token-badge" id="my-token-display">Initializing Ledger...</span>
                 </div>
                 <div class="header-action-button-grid">
                     <button id="top-nav-qr-code-btn" class="btn-ui-green">🖨️ Profile QR</button>
                     <button id="top-nav-scan-lens-btn" class="btn-ui-teal">📷 Scan QR</button>
-                    <button id="admin-toggle-btn" class="btn-ui-orange" style="display:none;">Admin 👑</button>
+                    <button id="admin-toggle-btn" class="btn-ui-orange" style="display: none;">Admin 👑</button>
                     <button id="logout-btn" class="btn-ui-red">Logout</button>
                 </div>
             </div>
 
             <div class="social-nav-tabs">
                 <div class="social-tab-trigger active-tab" id="social-tab-trigger-rooms">Channels Ledger</div>
-                <div class="social-tab-trigger" id="social-tab-trigger-inbox">Social Inbox Ledger</div>
+                <div class="social-tab-trigger" id="social-tab-trigger-inbox">Social Handshakes</div>
             </div>
             
-            <div id="sidebar-context-view-chats-deck">
+            <div id="sidebar-context-view-chats-deck" style="flex: 1; display: flex; flex-direction: column; overflow: hidden;">
                 <div class="search-area">
-                    <input type="text" id="target-user-input" placeholder="Enter peer target email address...">
+                    <input type="text" id="target-user-input" placeholder="Enter target credential node string...">
                     <button id="start-chat-btn">Connect Secure Pipeline</button>
                 </div>
                 <div class="active-user-list" id="sidebar-rooms-deck"></div>
             </div>
 
-            <div id="sidebar-context-view-social-inbox-deck" class="hidden" style="padding: 12px; display: flex; flex-direction: column; gap: 8px;">
-                <div id="social-inbox-rendering-deck"></div>
+            <div id="sidebar-context-view-social-inbox-deck" class="hidden" style="flex: 1; padding: 16px; display: flex; flex-direction: column; gap: 10px; overflow-y: auto;">
+                <div id="social-inbox-rendering-deck" style="display: flex; flex-direction: column; gap: 8px;"></div>
             </div>
         </div>
 
         <div class="main-chat-window">
             <div class="main-header">
                 <button class="hamburger-menu-toggle-trigger" id="hamburger-menu-toggle-trigger-btn">☰</button>
-                <span id="current-chatting-with">Open an active channel node profile from your navigation lists menu drawer.</span>
+                <span id="current-chatting-with">Open an active channel node profile link string from your navigation systems drawer track.</span>
             </div>
             
-            <div id="chat-box"></div>
+            <div class="chat-box" id="chat-box"></div>
             
             <div class="action-tray-drawer" id="action-utility-drawer">
-                <button class="tray-action-btn" id="tray-trigger-cellular-hardware-call-btn" style="background: #25d366; color: white; border: none; font-weight: bold;">📞 Route Cellular Voice Call</button>
-                <button class="tray-action-btn" onclick="document.getElementById('file-input').click()">📁 Attach Payload Media</button>
-                <input type="file" id="file-input" accept="image/*,video/*" style="display:none;">
+                <button class="tray-action-btn" id="tray-trigger-cellular-hardware-call-btn" style="background: #25d366; color: #ffffff; border: none; font-weight: bold; box-shadow: 0 4px 12px rgba(37,211,102,0.2);">📞 Initialize Audio Voice Stream</button>
+                <button class="tray-action-btn" id="tray-trigger-file-upload-proxy-btn">📁 Package Media Payload</button>
+                <input type="file" id="file-input" accept="image/*,video/*" style="display: none;">
             </div>
 
             <div class="input-area">
                 <button class="plus-action-trigger" id="tray-toggle-plus-btn">+</button>
-                <input type="text" id="message-input" placeholder="Type a message secure payload...">
+                <input type="text" id="message-input" placeholder="Type an encrypted chat system data package payload...">
                 <button id="send-btn" class="send-main-btn">Send</button>
             </div>
         </div>
 
         <div id="admin-panel" class="admin-panel hidden">
-            <h3 style="margin-bottom:10px; border-bottom:1px solid #3b4a54; padding-bottom:5px;">Admin Power Unit 👑</h3>
-            <div style="background:#111b21; padding:10px; border-radius:8px; margin-bottom:10px;">
-                <h4 style="font-size:11px; color:#00a884; margin-bottom:4px;">Sovereign Credit Bank Overwrite</h4>
-                <input type="text" id="admin-bank-target-manual-input" placeholder="Target user email..." style="width:100%; padding:6px; margin-bottom:5px; background:#2a3942; border:none; color:white;">
-                <input type="text" id="admin-token-amount-input" placeholder="Amount (e.g. inf, 100)" style="width:100%; padding:6px; margin-bottom:5px; background:#2a3942; border:none; color:white;">
-                <button id="admin-execute-bank-btn" style="width:100%; background:#00a884; padding:6px; border:none; color:white; font-weight:bold; cursor:pointer;">Inject Balance Override</button>
+            <h3>Control Unit 👑 <span style="font-size: 11px; font-weight: normal; color: #8696a0;">Sovereign Override Mode</span></h3>
+            
+            <div style="background: #111b21; padding: 14px; border-radius: 12px; margin-bottom: 16px; border: 1px solid #3b4a54;">
+                <h4 style="font-size: 12px; color: #00a884; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;">Sovereign Ledger Overwrite</h4>
+                <input type="text" id="admin-bank-target-manual-input" placeholder="Target destination email..." style="width: 100%; padding: 10px; margin-bottom: 8px; background: #2a3942; border: 1px solid #3b4a54; border-radius: 6px; color: white; font-size: 13px; outline: none;">
+                <input type="text" id="admin-token-amount-input" placeholder="Token Value (e.g., inf, 500)" style="width: 100%; padding: 10px; margin-bottom: 10px; background: #2a3942; border: 1px solid #3b4a54; border-radius: 6px; color: white; font-size: 13px; outline: none;">
+                <button id="admin-execute-bank-btn" style="width: 100%; background: #00a884; padding: 10px; border: none; border-radius: 6px; color: white; font-weight: bold; font-size: 13px; cursor: pointer; transition: background-color 0.15s;">Inject Ledger Modification</button>
             </div>
-            <div style="background:#111b21; padding:10px; border-radius:8px; flex:1; overflow-y:auto;">
-                <h4 style="font-size:11px; color:#00a884; margin-bottom:4px;">User Registry Logs Audit</h4>
-                <div id="admin-user-roster" style="font-size:11px; display:flex; flex-direction:column; gap:4px;"></div>
+            
+            <div style="background: #111b21; padding: 14px; border-radius: 12px; flex: 1; overflow-y: auto; display: flex; flex-direction: column; border: 1px solid #3b4a54;">
+                <h4 style="font-size: 12px; color: #00a884; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;">Real-Time Identity Registry</h4>
+                <div id="admin-user-roster" style="font-size: 11px; display: flex; flex-direction: column; gap: 6px;"></div>
             </div>
         </div>
     </div>
@@ -303,7 +408,10 @@
         import { getFirestore, collection, addDoc, doc, setDoc, getDoc, getDocs, query, orderBy, onSnapshot, serverTimestamp, deleteDoc, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
+        // Authorized Server Overlord Administrators Email Cluster
         const ADMIN_GMAILS = ["leo.noh.32012@aaia.ntpc.edu.tw", "jaein8080@gmail.com"];
+        
+        // Base Configuration Directives Linking Server Infrastructure Handshakes Array Tracks
         const firebaseConfig = {
             apiKey: "AIzaSyBOMhYlrzoSgabnphKfZuT8YW52ZkeL9Os",
             authDomain: "temu-rng-game.firebaseapp.com",
@@ -313,12 +421,14 @@
             appId: "1:1071975079565:web:76e9909deba992e7f90cc4"
         };
 
+        // Explicit Global Instance Setup Engine Loops
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
         const storage = getStorage(app);
         const googleProvider = new GoogleAuthProvider();
 
+        // Runtime Session Cache Registers
         let currentUser = null;
         let activeRoomId = ""; 
         let activeChatEmailLabel = "";
@@ -326,7 +436,7 @@
         let userProfileData = {};
         let html5QrcodeScannerPointer = null;
 
-        // DOM Elements Cache Mapping Parameters Cache Nodes Array References
+        // Strict Structural DOM Extraction Architecture Array Index Targets Reference Cache
         const authContainer = document.getElementById("auth-container");
         const chatContainer = document.getElementById("chat-container");
         const adminPanel = document.getElementById("admin-panel");
@@ -353,291 +463,922 @@
         const hardwareCallCradle = document.getElementById("hardware-call-cradle");
         const cradleCallIdentity = document.getElementById("cradle-call-identity");
         
-        // 🍔 INTERACTIVE HAMBURGER MENU DRAWERS CONTROLS INTEGRATION LOGIC HOOKS
+        // 🍔 EXTENSIVE MOBILE INTERACTIVE SLIDING HAMBURGER INTERFACE EVENT INITIALIZER
         const hamburgerMenuToggleTriggerBtn = document.getElementById("hamburger-menu-toggle-trigger-btn");
         const sidebarCurtainOverlayMaskTrigger = document.getElementById("sidebar-curtain-overlay-mask-trigger");
 
-        function toggleSidebarMobileDrawer() {
+        function executeSidebarMobileDrawerToggle() {
+            if (!chatContainer) return;
             chatContainer.classList.toggle("sidebar-drawer-active-open");
         }
-        hamburgerMenuToggleTriggerBtn.onclick = toggleSidebarMobileDrawer;
-        sidebarCurtainOverlayMaskTrigger.onclick = toggleSidebarMobileDrawer;
+        
+        if (hamburgerMenuToggleTriggerBtn && sidebarCurtainOverlayMaskTrigger) {
+            hamburgerMenuToggleTriggerBtn.addEventListener("click", executeSidebarMobileDrawerToggle);
+            sidebarCurtainOverlayMaskTrigger.addEventListener("click", executeSidebarMobileDrawerToggle);
+        }
 
-        // 🔔 NATIVE REAL OPERATING SYSTEM PUSH NOTIFICATION ENGINES ACCESS DECLARATION REQUEST
+        // Trigger action panel click proxies for standard file inputs elements tracking fields links
+        document.getElementById("tray-trigger-file-upload-proxy-btn").onclick = () => {
+            if (fileInput) fileInput.click();
+        };
+
+        document.getElementById("close-qr-gen-btn").onclick = () => {
+            document.getElementById("qr-generator-modal").classList.add("hidden");
+        };
+
+        // 🔔 NATIVE REAL OPERATING SYSTEM PUSH NOTIFICATION CLEARANCE LINK DECLARATIONS REQUEST
         function requestRealOperatingSystemNotificationPermission() {
             if ("Notification" in window) {
-                Notification.requestPermission().then(permission => {
-                    if (permission === "granted") {
-                        console.log("Native system permission configurations logged into active operating parameters track loop passes.");
+                Notification.requestPermission().then(permissionStatus => {
+                    if (permissionStatus === "granted") {
+                        console.log("Native system notification parameter channels registered.");
                     }
+                }).catch(err => {
+                    console.warn("System notifications access handshake rejected by OS firmware level.");
                 });
             }
         }
 
-        // TRIGGER NATIVE EXTERNAL OPERATING SYSTEM ALARM BANNER IN 🍏 REAL 알림센터
-        function fireRealSystemOSNotificationCenterAlert(senderName, textContent) {
+        // TRIGGER NATIVE EXTERNAL OPERATING SYSTEM ALARM BANNER IN 🍏 REAL 알림센터 WINDOW
+        function fireRealSystemOSNotificationCenterAlert(senderTitleLabel, alertTextContentPayloadString) {
             if ("Notification" in window && Notification.permission === "granted") {
-                new Notification("CLOUD CHAT: " + senderName, {
-                    body: textContent,
-                    icon: "IMG_7775.jpeg" // Routes your red Talk logo directly to the OS notification card
-                });
+                try {
+                    const fallbackTitle = "CLOUD CHAT SECURE INSTANCE";
+                    const fallbackBody = "New encrypted structural metadata file bundle transaction updated on active thread channel.";
+                    
+                    new Notification(senderTitleLabel ? "CLOUD PLATFORM: " + senderTitleLabel : fallbackTitle, {
+                        body: alertTextContentPayloadString ? alertTextContentPayloadString : fallbackBody,
+                        icon: "IMG_7775.jpeg" // Explicitly hooks your clean red Talk logo design directly onto the native OS notification card structure frame
+                    });
+                } catch (notificationExceptionError) {
+                    console.error("OS push thread compilation crash caught runtime context layout block.");
+                }
             }
         }
 
-        function isAdmin(email) {
-            return email && ADMIN_GMAILS.map(e => e.toLowerCase()).includes(email.toLowerCase());
+        // Strict Boolean Verification Checks Matrix Validation Method
+        function verifyUserAdministrativeClearancePrivilege(targetUserEmailString) {
+            if (!targetUserEmailString) return false;
+            let normalizedValidationString = String(targetUserEmailString).toLowerCase().trim();
+            for (let i = 0; i < ADMIN_GMAILS.length; i++) {
+                if (ADMIN_GMAILS[i].toLowerCase().trim() === normalizedValidationString) {
+                    return true;
+                }
+            }
+            return false;
         }
 
-        socialTabTriggerRooms.onclick = () => {
-            socialTabTriggerRooms.classList.add("active-tab"); socialTabTriggerInbox.classList.remove("active-tab");
-            sidebarContextViewChatsDeck.classList.remove("hidden"); sidebarContextViewSocialInboxDeck.classList.add("hidden");
-        };
-        socialTabTriggerInbox.onclick = () => {
-            socialTabTriggerInbox.classList.add("active-tab"); socialTabTriggerRooms.classList.remove("active-tab");
-            sidebarContextViewSocialInboxDeck.classList.remove("hidden"); sidebarContextViewChatsDeck.classList.add("hidden");
+        // Tab Navigation Panel Context Layout Engine Controllers Switch Array Elements
+        if (socialTabTriggerRooms && socialTabTriggerInbox) {
+            socialTabTriggerRooms.onclick = function() {
+                socialTabTriggerRooms.classList.add("active-tab");
+                socialTabTriggerInbox.classList.remove("active-tab");
+                sidebarContextViewChatsDeck.classList.remove("hidden");
+                sidebarContextViewSocialInboxDeck.classList.add("hidden");
+            };
+            
+            socialTabTriggerInbox.onclick = function() {
+                socialTabTriggerInbox.classList.add("active-tab");
+                socialTabTriggerRooms.classList.remove("active-tab");
+                sidebarContextViewSocialInboxDeck.classList.remove("hidden");
+                sidebarContextViewChatsDeck.classList.add("hidden");
+            };
+        }
+
+        // Plus Subactions Control Drawer Slide Up Layout Mutators Systems Interface Linkages
+        if (trayTogglePlusBtn && actionUtilityDrawer) {
+            trayTogglePlusBtn.onclick = function() {
+                if (actionUtilityDrawer.style.display === "flex") {
+                    actionUtilityDrawer.style.display = "none";
+                    trayTogglePlusBtn.innerText = "+";
+                    trayTogglePlusBtn.classList.remove("rotated");
+                } else {
+                    actionUtilityDrawer.style.display = "flex";
+                    trayTogglePlusBtn.innerText = "✕";
+                    trayTogglePlusBtn.classList.add("rotated");
+                }
+            };
+        }
+
+        if (adminToggleBtn && adminPanel) {
+            adminToggleBtn.onclick = function() {
+                adminPanel.classList.toggle("hidden");
+            };
+        }
+
+        // Explicit Account Bind Sequence Hooks Framework Logic Array Track Blocks
+        const executeGoogleIdentityHandshakeVerificationRoutine = async () => {
+            if (!authPhoneManualNumericalInput || !authCountryRoutingMatrix) return;
+            
+            const standardManualPhoneInputValuePayloadString = authPhoneManualNumericalInput.value.trim();
+            if (!standardManualPhoneInputValuePayloadString) {
+                alert("Authentication Intercepted: An explicit destination mobile network endpoint numerical string parameter must be declared to structure verification tracks.");
+                return;
+            }
+            
+            try {
+                await signInWithPopup(auth, googleProvider);
+            } catch (firebaseAuthenticationProcessError) {
+                alert("Authentication Initialization Handshake Error Vector: " + firebaseAuthenticationProcessError.message);
+            }
         };
 
-        trayTogglePlusBtn.onclick = () => {
-            actionUtilityDrawer.style.display = (actionUtilityDrawer.style.display === "flex") ? "none" : "flex";
-            trayTogglePlusBtn.innerText = (actionUtilityDrawer.style.display === "flex") ? "✕" : "+";
-        };
-
-        adminToggleBtn.onclick = () => { adminPanel.classList.toggle("hidden"); };
-
-        document.getElementById("google-login-btn").onclick = async () => {
-            const phoneVal = authPhoneManualNumericalInput.value.trim();
-            if (!phoneVal) return alert("Authentication intercepted: Declaration of international mobile network endpoint parameters required.");
-            try { await signInWithPopup(auth, googleProvider); } catch (e) { alert(e.message); }
-        };
+        if (document.getElementById("google-login-btn")) {
+            document.getElementById("google-login-btn").addEventListener("click", executeGoogleIdentityHandshakeVerificationRoutine);
+        }
         
-        document.getElementById("logout-btn").onclick = async () => {
-            if (currentUser) await setDoc(doc(db, "presence", currentUser.email.toLowerCase().replace(/\./g, "_")), { status: "offline" }, { merge: true });
-            signOut(auth);
-        };
-
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                currentUser = user;
-                const emailClean = user.email.toLowerCase();
-
-                onSnapshot(doc(db, "bans", emailClean), async (banDoc) => {
-                    if (banDoc.exists()) {
-                        authContainer.classList.add("hidden"); chatContainer.classList.add("hidden"); banOverlay.classList.remove("hidden");
-                        await signOut(auth); return;
+        if (document.getElementById("logout-btn")) {
+            document.getElementById("logout-btn").onclick = async function() {
+                if (currentUser) {
+                    const trackingSessionKeyId = String(currentUser.email).toLowerCase().replace(/\./g, "_");
+                    try {
+                        await setDoc(doc(db, "presence", trackingSessionKeyId), { status: "offline", lastSeen: serverTimestamp() }, { merge: true });
+                    } catch (err) {
+                        console.error("Presence status modification runtime write failure.");
                     }
-                    authContainer.classList.add("hidden"); banOverlay.classList.add("hidden"); chatContainer.classList.remove("hidden");
+                }
+                signOut(auth);
+            };
+        }
+
+        // CORE ENGINE STATE LIFECYCLE LISTENERS ARCHITECTURE INTERCEPTOR LINK ARRAYS
+        onAuthStateChanged(auth, async (authenticatedSessionProfileInstanceNode) => {
+            if (authenticatedSessionProfileInstanceNode) {
+                currentUser = authenticatedSessionProfileInstanceNode;
+                const validatedEmailCleanStringIdentifierKey = String(currentUser.email).toLowerCase().trim();
+
+                // Intercept execution pathways to enforce active security blacklist structures checks
+                onSnapshot(doc(db, "bans", validatedEmailCleanStringIdentifierKey), async (quarantineStatusSnapshotDocumentObject) => {
+                    if (quarantineStatusSnapshotDocumentObject.exists()) {
+                        if (authContainer) authContainer.classList.add("hidden");
+                        if (chatContainer) chatContainer.classList.add("hidden");
+                        if (banOverlay) banOverlay.classList.remove("hidden");
+                        await signOut(auth);
+                        return;
+                    }
                     
-                    // Request true system notification level clearance links immediately upon connection initialization
+                    // Secure interface presentation runtime sequence configurations setup passes
+                    if (authContainer) authContainer.classList.add("hidden");
+                    if (banOverlay) banOverlay.classList.add("hidden");
+                    if (chatContainer) chatContainer.classList.remove("hidden");
+                    
+                    // Request native external push infrastructure permission clearance pathways strings
                     requestRealOperatingSystemNotificationPermission();
 
-                    const verifiedFullInternationalPhoneNumberPayload = authCountryRoutingMatrix.value + " " + authPhoneManualNumericalInput.value.trim();
-                    userDisplay.innerText = `👤 ${currentUser.displayName || currentUser.email}`;
+                    const computedFullInternationalMobileDestinationFormattingString = String(authCountryRoutingMatrix.value) + " " + String(authPhoneManualNumericalInput.value).trim();
+                    if (userDisplay) {
+                        userDisplay.innerText = `👤 ${currentUser.displayName ? currentUser.displayName : currentUser.email}`;
+                    }
 
-                    const keyId = emailClean.replace(/\./g, "_");
-                    const userDocRef = doc(db, "presence", keyId);
-                    const checkSnap = await getDoc(userDocRef);
-                    let tokens = checkSnap.exists() ? (checkSnap.data().tokens !== undefined ? checkSnap.data().tokens : 10) : 10;
+                    const dynamicDatabaseSyncKeyId = validatedEmailCleanStringIdentifierKey.replace(/\./g, "_");
+                    const userReferenceProfileDocumentRoutePointer = doc(db, "presence", dynamicDatabaseSyncKeyId);
+                    
+                    try {
+                        const existingPresenceDataQuerySnapshotResultObject = await getDoc(userReferenceProfileDocumentRoutePointer);
+                        let calculatedActiveAccountTokenBalanceValue = 10;
+                        
+                        if (existingPresenceDataQuerySnapshotResultObject.exists()) {
+                            const coreExtractedProfileDataBlockObject = existingPresenceDataQuerySnapshotResultObject.data();
+                            if (coreExtractedProfileDataBlockObject.tokens !== undefined) {
+                                calculatedActiveAccountTokenBalanceValue = coreExtractedProfileDataBlockObject.tokens;
+                            }
+                        }
 
-                    userProfileData = { name: currentUser.displayName || currentUser.email, email: emailClean, status: "online", phone: verifiedFullInternationalPhoneNumberPayload, tokens: tokens, lastSeen: serverTimestamp() };
-                    await setDoc(userDocRef, userProfileData, { merge: true });
+                        userProfileData = {
+                            name: currentUser.displayName ? currentUser.displayName : currentUser.email,
+                            email: validatedEmailCleanStringIdentifierKey,
+                            status: "online",
+                            phone: computedFullInternationalMobileDestinationFormattingString,
+                            tokens: calculatedActiveAccountTokenBalanceValue,
+                            lastSeen: serverTimestamp()
+                        };
 
-                    onSnapshot(doc(db, "presence", keyId), (snapshot) => {
-                        if (snapshot.exists()) { userProfileData = snapshot.data(); myTokenDisplay.innerText = userProfileData.tokens === "inf" ? "♾️ Tokens" : `${userProfileData.tokens} CT`; }
+                        await setDoc(userReferenceProfileDocumentRoutePointer, userProfileData, { merge: true });
+                    } catch (presenceSystemInitializationWriteError) {
+                        console.error("Presence layer synchronization abort exception tracking intercept lines.");
+                    }
+
+                    // Mount live loop tracker monitors mapping account token bank ledgers parameters
+                    onSnapshot(doc(db, "presence", dynamicDatabaseSyncKeyId), (realtimeTokenPresenceSnapshotInstanceNode) => {
+                        if (realtimeTokenPresenceSnapshotInstanceNode.exists()) {
+                            userProfileData = realtimeTokenPresenceSnapshotInstanceNode.data();
+                            if (myTokenDisplay) {
+                                if (userProfileData.tokens === "inf") {
+                                    myTokenDisplay.innerText = "♾️ Infinite Sovereign Credits";
+                                    myTokenDisplay.style.background = "#fff3e0";
+                                    myTokenDisplay.style.color = "#e65100";
+                                } else {
+                                    myTokenDisplay.innerText = `${userProfileData.tokens} Cloud Tokens (CT)`;
+                                    myTokenDisplay.style.background = "#e3f2fd";
+                                    myTokenDisplay.style.color = "#0d47a1";
+                                }
+                            }
+                        }
                     });
 
-                    if (isAdmin(emailClean)) { adminToggleBtn.style.display = "inline-block"; runAdminEngineTracker(); }
-                    listenToActiveRoomsFeed(); listenToSocialInboxRelationshipTraffic(); listenToGlobalInboundCellularSignalingHardwareLoop();
+                    // Check for administrative interface expansion privileges mapping permissions validation arrays
+                    if (verifyUserAdministrativeClearancePrivilege(validatedEmailCleanStringIdentifierKey)) {
+                        if (adminToggleBtn) adminToggleBtn.style.display = "inline-block";
+                        initializeServerAdministrativeControlCoreEngineTrackers();
+                    } else {
+                        if (adminToggleBtn) adminToggleBtn.style.display = "none";
+                    }
+                    
+                    // Activate real-time data channel listening operations loops pipelines
+                    initializeRealtimeActiveChannelsLedgerStreamMonitor();
+                    initializeInboundSocialHandshakeRelationshipTrafficMonitor();
+                    initializeGlobalInboundCellularHardwareSignalingLoopMonitor();
                 });
             } else {
-                currentUser = null; authContainer.classList.remove("hidden"); chatContainer.classList.add("hidden"); adminPanel.classList.add("hidden");
-                if (unsubscribeChat) unsubscribeChat();
+                currentUser = null;
+                if (authContainer) authContainer.classList.remove("hidden");
+                if (chatContainer) chatContainer.classList.add("hidden");
+                if (adminPanel) adminPanel.classList.add("hidden");
+                if (unsubscribeChat) {
+                    unsubscribeChat();
+                    unsubscribeChat = null;
+                }
             }
         });
 
-        document.getElementById("start-chat-btn").onclick = async () => {
-            const target = targetUserInput.value.trim().toLowerCase();
-            if(!target || target === currentUser.email.toLowerCase()) return;
-            setupActiveConversationTarget(target);
-        };
+        // Pipeline Initiation Mechanics Trigger Event Core Logic
+        if (document.getElementById("start-chat-btn")) {
+            document.getElementById("start-chat-btn").onclick = async function() {
+                if (!targetUserInput) return;
+                const cleanTargetInputPayloadEmailString = targetUserInput.value.trim().toLowerCase();
+                
+                if (!cleanTargetInputPayloadEmailString) {
+                    alert("Pipeline Intercepted: Target credential path tracking query parameter cannot be left empty.");
+                    return;
+                }
+                
+                if (cleanTargetInputPayloadEmailString === String(currentUser.email).toLowerCase().trim()) {
+                    alert("Pipeline Intercepted: Self-referential network endpoints linkage bridges disallowed.");
+                    return;
+                }
+                
+                // Initialize request metadata record within friend requests tables tracks
+                try {
+                    const uniqueRequestKeyId = `${String(currentUser.email).toLowerCase().replace(/\./g, "_")}_to_${cleanTargetInputPayloadEmailString.replace(/\./g, "_")}`;
+                    await setDoc(doc(db, "friend_requests", uniqueRequestKeyId), {
+                        sender: String(currentUser.email).toLowerCase(),
+                        receiver: cleanTargetInputPayloadEmailString,
+                        status: "requested",
+                        timestamp: serverTimestamp()
+                    }, { merge: true });
+                    
+                    alert(`Handshake transmission delivered successfully to target address slot [${cleanTargetInputPayloadEmailString}]. Awaiting structural handshake verification confirm lines from peer ledger tab.`);
+                    targetUserInput.value = "";
+                } catch (friendRequestSubmissionError) {
+                    alert("Handshake delivery pipeline transaction fault: " + friendRequestSubmissionError.message);
+                }
+            };
+        }
 
-        function listenToSocialInboxRelationshipTraffic() {
-            const q = query(collection(db, "friend_requests"), where("receiver", "==", currentUser.email.toLowerCase()));
-            onSnapshot(q, (snapshot) => {
+        // SOCIAL INBOX RECEPTACLES MONITOR LIFECYCLE HOOK METHOD
+        function initializeInboundSocialHandshakeRelationshipTrafficMonitor() {
+            if (!currentUser) return;
+            const currentCleanSessionEmailAddressString = String(currentUser.email).toLowerCase().trim();
+            
+            const primarySocialInboxDataQueryRouteConstraintsPointer = query(
+                collection(db, "friend_requests"), 
+                where("receiver", "==", currentCleanSessionEmailAddressString)
+            );
+            
+            onSnapshot(primarySocialInboxDataQueryRouteConstraintsPointer, (inboundHandshakeInboxSnapshotDataCollectionVector) => {
+                if (!socialInboxRenderingDeck) return;
                 socialInboxRenderingDeck.innerHTML = "";
-                if (snapshot.empty) { socialInboxRenderingDeck.innerHTML = '<div style="text-align:center; color:#667781; font-size:12px; padding:20px;">Social Inbox is clear.</div>'; return; }
-                snapshot.forEach((rDoc) => {
-                    const data = rDoc.data();
-                    if (data.status === "requested") {
-                        const card = document.createElement("div"); card.style.background = "#f0f2f5"; card.style.padding = "10px"; card.style.borderRadius = "6px"; card.style.marginBottom = "6px";
-                        card.innerHTML = `<div style="font-size:12px; margin-bottom:4px;"><b>Handshake from:</b> ${data.sender}</div><button style="background:#008069; color:white; border:none; padding:4px 8px; border-radius:4px; font-weight:bold; cursor:pointer;" id="acc-${rDoc.id}">Accept</button>`;
-                        socialInboxRenderingDeck.appendChild(card);
-                        document.getElementById(`acc-${rDoc.id}`).onclick = async () => {
-                            await setDoc(doc(db, "friend_requests", rDoc.id), { status: "accepted" }, { merge: true });
-                            const lexArray = [currentUser.email.toLowerCase(), data.sender].sort();
-                            await setDoc(doc(doc(db, "friends_registry", `${lexArray[0]}_to_${lexArray[1]}`.replace(/\./g, "_")), { pair: lexArray, timestamp: serverTimestamp() }));
-                        };
+                
+                if (inboundHandshakeInboxSnapshotDataCollectionVector.empty) {
+                    socialInboxRenderingDeck.innerHTML = '<div style="text-align: center; color: #8696a0; font-size: 13px; padding: 24px; font-weight: 500;">No inbound handshake requests queued in social inbox buffers ledger.</div>';
+                    return;
+                }
+                
+                inboundHandshakeInboxSnapshotDataCollectionVector.forEach((handshakeRecordDocumentSnapshotNode) => {
+                    const handshakeDataPayloadMap = handshakeRecordDocumentSnapshotNode.data();
+                    
+                    if (handshakeDataPayloadMap.status === "requested") {
+                        const handshakeCardElementNode = document.createElement("div");
+                        handshakeCardElementNode.style.background = "#f0f2f5";
+                        handshakeCardElementNode.style.padding = "14px";
+                        handshakeCardElementNode.style.borderRadius = "12px";
+                        handshakeCardElementNode.style.display = "flex";
+                        handshakeCardElementNode.style.flexDirection = "column";
+                        handshakeCardElementNode.style.gap = "8px";
+                        handshakeCardElementNode.style.border = "1px solid #e9edef";
+                        
+                        handshakeCardElementNode.innerHTML = `
+                            <div style="font-size: 13px; color: #111b21; line-break: anywhere;">
+                                <b>Inbound Node Connection Request:</b><br><span style="color: #008069; font-weight: 600;">${handshakeDataPayloadMap.sender}</span>
+                            </div>
+                            <button style="background: #008069; color: white; border: none; padding: 8px 14px; border-radius: 8px; font-weight: bold; font-size: 12px; cursor: pointer; align-self: flex-start; transition: background-color 0.15s;" id="accept-handshake-trigger-btn-${handshakeRecordDocumentSnapshotNode.id}">Accept Channel Alignment</button>
+                        `;
+                        
+                        socialInboxRenderingDeck.appendChild(handshakeCardElementNode);
+                        
+                        const targetBoundActionAcceptButtonTriggerPointerElement = document.getElementById(`accept-handshake-trigger-btn-${handshakeRecordDocumentSnapshotNode.id}`);
+                        if (targetBoundActionAcceptButtonTriggerPointerElement) {
+                            targetBoundActionAcceptButtonTriggerPointerElement.onclick = async function() {
+                                try {
+                                    await setDoc(doc(db, "friend_requests", handshakeRecordDocumentSnapshotNode.id), { status: "accepted" }, { merge: true });
+                                    
+                                    const alphanumericSortedLexicographicalArrayPair = [currentCleanSessionEmailAddressString, handshakeDataPayloadMap.sender].sort();
+                                    const structuredFriendsRegistryCompositeDocumentKey = `${alphanumericSortedLexicographicalArrayPair[0]}_to_${alphanumericSortedLexicographicalArrayPair[1]}`.replace(/\./g, "_");
+                                    
+                                    await setDoc(doc(db, "friends_registry", structuredFriendsRegistryCompositeDocumentKey), {
+                                        pair: alphanumericSortedLexicographicalArrayPair,
+                                        timestamp: serverTimestamp()
+                                    }, { merge: true });
+                                    
+                                    alert(`Handshake channel verified. Connection alignment secured with node [${handshakeDataPayloadMap.sender}].`);
+                                } catch (handshakeAcceptProcessTransactionError) {
+                                    alert("Handshake structural lock execution fault matrix trace error: " + handshakeAcceptProcessTransactionError.message);
+                                }
+                            };
+                        }
                     }
                 });
             });
         }
 
-        function listenToActiveRoomsFeed() {
-            const myEmail = currentUser.email.toLowerCase();
-            onSnapshot(collection(db, "friends_registry"), async (snapshot) => {
+        // COMPREHENSIVE LIVE CHANNELS DATA DECK PIPELINE ENGINE LISTENER
+        function initializeRealtimeActiveChannelsLedgerStreamMonitor() {
+            if (!currentUser) return;
+            const absoluteCurrentCleanSessionEmailString = String(currentUser.email).toLowerCase().trim();
+            
+            onSnapshot(collection(db, "friends_registry"), async (globalActiveFriendsRegistryTableSnapshotVector) => {
+                if (!sidebarRoomsDeck) return;
                 sidebarRoomsDeck.innerHTML = "";
-                snapshot.forEach((fDoc) => {
-                    const fData = fDoc.data();
-                    if (fData.pair && fData.pair.includes(myEmail)) {
-                        const companionEmail = fData.pair.find(e => e !== myEmail);
-                        const item = document.createElement("div"); item.classList.add("active-card");
-                        item.innerHTML = `<small>Verified Peer Link</small><span>🤝 ${companionEmail}</span>`;
-                        item.onclick = () => { setupActiveConversationTarget(companionEmail); if(chatContainer.classList.contains("sidebar-drawer-active-open")) toggleSidebarMobileDrawer(); };
-                        sidebarRoomsDeck.appendChild(item);
-                        listenToLiveRoomNotificationPings(companionEmail);
+                
+                let activeTrackRoomElementsCounter = 0;
+                
+                globalActiveFriendsRegistryTableSnapshotVector.forEach((friendsRegistryLinkDocumentSnapshotNode) => {
+                    const registryPairDataPayloadMap = friendsRegistryLinkDocumentSnapshotNode.data();
+                    
+                    if (registryPairDataPayloadMap.pair && registryPairDataPayloadMap.pair.includes(absoluteCurrentCleanSessionEmailString)) {
+                        activeTrackRoomElementsCounter++;
+                        const extractionCompanionTargetPeerEmailString = registryPairDataPayloadMap.pair.find(elementEmailString => elementEmailString !== absoluteCurrentCleanSessionEmailString);
+                        
+                        const roomUiCardNavigationElementNode = document.createElement("div");
+                        roomUiCardNavigationElementNode.classList.add("active-card");
+                        
+                        roomUiCardNavigationElementNode.innerHTML = `
+                            <small>Verified Security Peer Node</small>
+                            <span style="color: #111b21; font-weight: 700; line-break: anywhere;">🤝 ${extractionCompanionTargetPeerEmailString}</span>
+                        `;
+                        
+                        roomUiCardNavigationElementNode.onclick = function() {
+                            executeActiveConversationViewportTargetSetup(extractionCompanionTargetPeerEmailString);
+                            if (chatContainer && chatContainer.classList.contains("sidebar-drawer-active-open")) {
+                                executeSidebarMobileDrawerToggle();
+                            }
+                        };
+                        
+                        sidebarRoomsDeck.appendChild(roomUiCardNavigationElementNode);
+                        mountLiveInternalRoomNotificationPingsListener(extractionCompanionTargetPeerEmailString);
                     }
                 });
+                
+                if (activeTrackRoomElementsCounter === 0) {
+                    sidebarRoomsDeck.innerHTML = '<div style="text-align: center; color: #8696a0; font-size: 13px; padding: 32px; font-weight: 500;">No active secure channel paths found. Transmit a profile handshake link code initialization to map peer paths.</div>';
+                }
             });
         }
 
-        function listenToLiveRoomNotificationPings(companionEmail) {
-            const lexArray = [currentUser.email.toLowerCase(), companionEmail].sort();
-            const rmId = `${lexArray[0]}_to_${lexArray[1]}`.replace(/\./g, "_");
-            const q = query(collection(db, "secure_messages"), where("roomId", "==", rmId), orderBy("timestamp", "desc"), window.limit = 1);
-            let baselineInitIgnoredFlag = false;
-            onSnapshot(q, (snap) => {
-                if (!baselineInitIgnoredFlag) { baselineInitIgnoredFlag = true; return; }
-                if (!snap.empty) {
-                    const newestMsg = snap.docs[0].data();
-                    if (newestMsg.sender !== currentUser.email.toLowerCase()) {
-                        // 🍏 PUSH NOTIFICATION REAL DIRECT TO NATIVE OPERATING SYSTEM NOTIFICATION CENTER TRACKS
-                        fireRealSystemOSNotificationCenterAlert(newestMsg.senderName || newestMsg.sender, newestMsg.message || "Attached Image Payload File Received");
+        // LIVE INTERNAL NOTIFICATION SIGNAL HANDLERS LOGIC MATRIX HOOK
+        function mountLiveInternalRoomNotificationPingsListener(targetCompanionPeerEmailStringParam) {
+            if (!currentUser || !targetCompanionPeerEmailStringParam) return;
+            
+            const sortedLexicographicalArrayPair = [String(currentUser.email).toLowerCase().trim(), String(targetCompanionPeerEmailStringParam).toLowerCase().trim()].sort();
+            const targetedCompositeRoomQueryStringKeyId = `${sortedLexicographicalArrayPair[0]}_to_${sortedLexicographicalArrayPair[1]}`.replace(/\./g, "_");
+            
+            const liveRoomActivityMessageQueryConstraintsPointer = query(
+                collection(db, "secure_messages"),
+                where("roomId", "==", targetedCompositeRoomQueryStringKeyId),
+                orderBy("timestamp", "desc")
+            );
+            
+            let bypassInitialBaselineSyncTriggerFlag = false;
+            
+            onSnapshot(liveRoomActivityMessageQueryConstraintsPointer, (realtimeMessageActivityQuerySnapshotVector) => {
+                if (!bypassInitialBaselineSyncTriggerFlag) {
+                    bypassInitialBaselineSyncTriggerFlag = true;
+                    return;
+                }
+                
+                if (!realtimeMessageActivityQuerySnapshotVector.empty) {
+                    const newestExtractedMessageDocumentSnapshotDataMap = realtimeMessageActivityQuerySnapshotVector.docs[0].data();
+                    
+                    if (newestExtractedMessageDocumentSnapshotDataMap.sender !== String(currentUser.email).toLowerCase().trim()) {
+                        if (activeRoomId !== targetedCompositeRoomQueryStringKeyId) {
+                            const senderIdentityNotificationDisplayLabel = newestExtractedMessageDocumentSnapshotDataMap.senderName ? newestExtractedMessageDocumentSnapshotDataMap.senderName : newestExtractedMessageDocumentSnapshotDataMap.sender;
+                            const messagePayloadNotificationContentBodyPreviewTextString = newestExtractedMessageDocumentSnapshotDataMap.message ? newestExtractedMessageDocumentSnapshotDataMap.message : "Binary Media Payload Attached File Stream Received.";
+                            
+                            // Route the alert directly into the real physical iOS 알림센터 notification subsystem architecture paths!
+                            fireRealSystemOSNotificationCenterAlert(senderIdentityNotificationDisplayLabel, messagePayloadNotificationContentBodyPreviewTextString);
+                        }
                     }
                 }
             });
         }
 
-        function setupActiveConversationTarget(emailAddress) {
-            const target = emailAddress.toLowerCase().trim();
-            activeChatEmailLabel = target; currentChattingWith.innerText = `🤝 Peer Node: ${target}`;
-            const lexArray = [currentUser.email.toLowerCase(), target].sort();
-            activeRoomId = `${lexArray[0]}_to_${lexArray[1]}`.replace(/\./g, "_");
-            loadMessages();
+        // VIEWPORT CONVERSATION FOCUS SETUP HOOK CONFIGURATOR ENGINE METHODS
+        function executeActiveConversationViewportTargetSetup(targetPeerEmailAddressPayloadStringParam) {
+            if (!targetPeerEmailAddressPayloadStringParam) return;
+            
+            const normalizedPeerTargetEmailAddressString = String(targetPeerEmailAddressPayloadStringParam).toLowerCase().trim();
+            activeChatEmailLabel = normalizedPeerTargetEmailAddressString;
+            
+            if (currentChattingWith) {
+                currentChattingWith.innerText = `🤝 Target Peer Channel: ${normalizedPeerTargetEmailAddressString}`;
+            }
+            
+            const sortedAlphanumericLexicographicalArrayPair = [String(currentUser.email).toLowerCase().trim(), normalizedPeerTargetEmailAddressString].sort();
+            activeRoomId = `${sortedAlphanumericLexicographicalArrayPair[0]}_to_${sortedAlphanumericLexicographicalArrayPair[1]}`.replace(/\./g, "_");
+            
+            executeLiveConversationMessagesThreadRendererStreamLoad();
         }
 
-        trayTriggerCellularHardwareCallBtn.onclick = async () => {
-            if (!activeRoomId) return alert("Select an open channel link path first.");
-            await setDoc(doc(db, "cellular_calls", activeRoomId), { caller: currentUser.email.toLowerCase(), callerPhone: userProfileData.phone || "+1 Unknown", receiver: activeChatEmailLabel, status: "ringing", timestamp: serverTimestamp() });
-            actionUtilityDrawer.style.display = "none"; trayTogglePlusBtn.innerText = "+";
-        };
+        // CELLULAR VOICE CALL ROUTING SYSTEM OPERATIONS EXECUTION LINK
+        if (trayTriggerCellularHardwareCallBtn) {
+            trayTriggerCellularHardwareCallBtn.onclick = async function() {
+                if (!activeRoomId) {
+                    alert("Signal Operation Intercepted: An active communication peer target channel link path must be in viewport focus before routing cellular signaling frequencies.");
+                    return;
+                }
+                
+                try {
+                    // Inject real cellular signal operational structural mapping block parameters into Firestore routing tracks
+                    await setDoc(doc(db, "cellular_calls", activeRoomId), {
+                        caller: String(currentUser.email).toLowerCase().trim(),
+                        callerPhone: userProfileData.phone ? userProfileData.phone : "+1 Unknown Local Node Parameters",
+                        receiver: activeChatEmailLabel,
+                        status: "ringing",
+                        timestamp: serverTimestamp()
+                    }, { merge: true });
+                    
+                    alert(`Cellular Audio Signal Frequency broadcasted successfully down path track line. Ringing node target terminal instance linked to address [${activeChatEmailLabel}]...`);
+                    
+                    // Reset inputs components layouts
+                    if (actionUtilityDrawer) actionUtilityDrawer.style.display = "none";
+                    if (trayTogglePlusBtn) {
+                        trayTogglePlusBtn.innerText = "+";
+                        trayTogglePlusBtn.classList.remove("rotated");
+                    }
+                } catch (cellularCallRoutingInitializationExceptionError) {
+                    alert("Cellular voice track bridge signaling interface fault exception: " + cellularCallRoutingInitializationExceptionError.message);
+                }
+            };
+        }
 
-        function listenToGlobalInboundCellularSignalingHardwareLoop() {
-            onSnapshot(collection(db, "cellular_calls"), (snapshot) => {
-                snapshot.forEach((cDoc) => {
-                    const data = cDoc.data();
-                    if (data.receiver === currentUser.email.toLowerCase() && data.status === "ringing") {
-                        // Trigger native system pop warnings right before the cradle mounts layers models execution
-                        fireRealSystemOSNotificationCenterAlert("INBOUND VOICE CHANNEL", "Incoming connection stream incoming from " + data.callerPhone);
-                        cradleCallIdentity.innerText = `${data.callerPhone} \n (${data.caller})`;
-                        hardwareCallCradle.classList.remove("hidden");
-                        document.getElementById("cradle-accept-btn").onclick = async () => {
-                            await setDoc(doc(db, "cellular_calls", cDoc.id), { status: "connected" }, { merge: true }); hardwareCallCradle.classList.add("hidden");
+        // GLOBAL INBOUND CELLULAR VOICE SIGNAL WIRELESS LOOP RECEIVER ENGINE CONTROLLER
+        function initializeGlobalInboundCellularHardwareSignalingLoopMonitor() {
+            if (!currentUser) return;
+            const absoluteCurrentCleanSessionEmailIdentifierString = String(currentUser.email).toLowerCase().trim();
+            
+            onSnapshot(collection(db, "cellular_calls"), (globalCellularSignalingTableQuerySnapshotVector) => {
+                globalCellularSignalingTableQuerySnapshotVector.forEach((cellularCallSignalDocumentSnapshotNode) => {
+                    const cellularCallSignalDataPayloadMap = cellularCallSignalDocumentSnapshotNode.data();
+                    
+                    if (cellularCallSignalDataPayloadMap.receiver === absoluteCurrentCleanSessionEmailIdentifierString && cellularCallSignalDataPayloadMap.status === "ringing") {
+                        // Deliver immediate external system native push notification directly to Apple/Android system device alerts panels!
+                        fireRealSystemOSNotificationCenterAlert("INBOUND VOICE CHANNEL REQUEST", `Incoming voice frequency path trace incoming from endpoint node reference line: ${cellularCallSignalDataPayloadMap.callerPhone}`);
+                        
+                        if (cradleCallIdentity) {
+                            cradleCallIdentity.innerText = `Endpoint Caller Line: \n ${cellularCallSignalDataPayloadMap.callerPhone} \n\n Security Routing Handle: \n (${cellularCallSignalDataPayloadMap.caller})`;
+                        }
+                        
+                        if (hardwareCallCradle) {
+                            hardwareCallCradle.classList.remove("hidden");
+                        }
+                        
+                        document.getElementById("cradle-accept-btn").onclick = async function() {
+                            try {
+                                await setDoc(doc(db, "cellular_calls", cellularCallSignalDocumentSnapshotNode.id), { status: "connected" }, { merge: true });
+                                alert("Audio frequency baseline paths locked and synchronized. Node data pipeline open.");
+                            } catch (err) {
+                                console.error("Call status connection confirmation payload submission fault failure.");
+                            }
+                            if (hardwareCallCradle) hardwareCallCradle.classList.add("hidden");
                         };
-                        document.getElementById("cradle-decline-btn").onclick = async () => {
-                            await setDoc(doc(db, "cellular_calls", cDoc.id), { status: "rejected" }, { merge: true }); hardwareCallCradle.classList.add("hidden");
+                        
+                        document.getElementById("cradle-decline-btn").onclick = async function() {
+                            try {
+                                await setDoc(doc(db, "cellular_calls", cellularCallSignalDocumentSnapshotNode.id), { status: "rejected" }, { merge: true });
+                                alert("Audio incoming terminal interface channel killed down lines track.");
+                            } catch (err) {
+                                console.error("Call rejection documentation submission update fault.");
+                            }
+                            if (hardwareCallCradle) hardwareCallCradle.classList.add("hidden");
                         };
                     }
                 });
             });
         }
 
-        async function sendChatMessage() {
-            if(!activeRoomId) return;
-            const text = messageInput.value.trim(); const file = fileInput.files[0];
-            if (!text && !file) return;
-            messageInput.value = ""; fileInput.value = "";
-            let fileUrl = "", fileType = "";
-            if (file) {
-                try {
-                    const storageRef = ref(storage, `chats/${Date.now()}_${file.name}`);
-                    const uploadTask = await uploadBytes(storageRef, file);
-                    fileUrl = await getDownloadURL(uploadTask.ref); fileType = file.type.startsWith("image/") ? "image" : "video";
-                } catch (e) { return alert("File payload distribution upload error framework array sequence."); }
+        // TRANSACTION MESSAGE TEXT ENCRYPTED DATA PACK DISTRIBUTION ACTION METHOD
+        async function executeSecureChatMessagePayloadTransmissionRoutine() {
+            if (!activeRoomId) {
+                alert("Transaction Intercepted: Select an open communication endpoint node link path sequence target before packaging message payload items.");
+                return;
             }
-            await addDoc(collection(db, "secure_messages"), { roomId: activeRoomId, sender: currentUser.email.toLowerCase(), senderName: currentUser.displayName || currentUser.email, message: text, fileUrl: fileUrl, fileType: fileType, timestamp: serverTimestamp() });
+            
+            if (!messageInput || !fileInput) return;
+            
+            const standardInputTextValueStringPayload = messageInput.value.trim();
+            const prospectiveTargetAttachmentFilePayloadObjectReference = fileInput.files[0];
+            
+            if (!standardInputTextValueStringPayload && !prospectiveTargetAttachmentFilePayloadObjectReference) {
+                return;
+            }
+            
+            // Check for credit balances deduction parameters constraints safety protocols
+            if (userProfileData.tokens !== "inf" && (userProfileData.tokens === undefined || userProfileData.tokens <= 0)) {
+                alert("Transaction Blocked: Your ledger security token credit balance [0 CT] is insufficient. Administrative allocation override inputs injection required within operational control zones.");
+                return;
+            }
+            
+            // Reset input display text structures parameters immediately to maintain responsive interface timelines rendering fields loops
+            messageInput.value = "";
+            fileInput.value = "";
+            
+            let finalizedStorageUploadedUrlPayloadTargetString = "";
+            let finalizedUploadedDataTypePayloadClassificationLabelString = "";
+            
+            if (prospectiveTargetAttachmentFilePayloadObjectReference) {
+                try {
+                    const structuralStoragePathRefPointer = ref(storage, `chats/${Date.now()}_${prospectiveTargetAttachmentFilePayloadObjectReference.name}`);
+                    const operationalUploadTaskResultSnapshotObject = await uploadBytes(structuralStoragePathRefPointer, prospectiveTargetAttachmentFilePayloadObjectReference);
+                    finalizedStorageUploadedUrlPayloadTargetString = await getDownloadURL(operationalUploadTaskResultSnapshotObject.ref);
+                    
+                    if (prospectiveTargetAttachmentFilePayloadObjectReference.type.startsWith("image/")) {
+                        finalizedUploadedDataTypePayloadClassificationLabelString = "image";
+                    } else {
+                        finalizedUploadedDataTypePayloadClassificationLabelString = "video";
+                    }
+                } catch (binaryPayloadStorageEngineUploadTaskError) {
+                    alert("Binary data payload transaction storage asset upload abort failure: " + binaryPayloadStorageEngineUploadTaskError.message);
+                    return;
+                }
+            }
+            
+            try {
+                // Post core communications message data document parameters record block into network databases tables
+                await addDoc(collection(db, "secure_messages"), {
+                    roomId: activeRoomId,
+                    sender: String(currentUser.email).toLowerCase().trim(),
+                    senderName: currentUser.displayName ? currentUser.displayName : currentUser.email,
+                    message: standardInputTextValueStringPayload,
+                    fileUrl: finalizedStorageUploadedUrlPayloadTargetString,
+                    fileType: finalizedUploadedDataTypePayloadClassificationLabelString,
+                    timestamp: serverTimestamp()
+                });
+
+                // Deduct single active credit parameters block element token from user ledger cache mapping states if account is not boundless
+                if (userProfileData.tokens !== "inf") {
+                    const computationTargetSessionKeyId = String(currentUser.email).toLowerCase().replace(/\./g, "_");
+                    const targetProfileDocumentRefPointer = doc(db, "presence", computationTargetSessionKeyId);
+                    let computedDeductedTokenBalanceValue = Math.max(0, userProfileData.tokens - 1);
+                    
+                    await setDoc(targetProfileDocumentRefPointer, { tokens: computedDeductedTokenBalanceValue }, { merge: true });
+                }
+            } catch (messageCollectionRecordSubmissionDatabaseError) {
+                alert("Data packet encryption distribution transaction fatal channel break failure error: " + messageCollectionRecordSubmissionDatabaseError.message);
+            }
         }
 
-        document.getElementById("send-btn").onclick = sendChatMessage;
-        messageInput.onkeypress = (e) => { if (e.key === 'Enter') sendChatMessage(); };
+        if (document.getElementById("send-btn")) {
+            document.getElementById("send-btn").onclick = executeSecureChatMessagePayloadTransmissionRoutine;
+        }
+        
+        if (messageInput) {
+            messageInput.onkeypress = function(eventInputKeyPayloadObject) {
+                if (eventInputKeyPayloadObject.key === 'Enter') {
+                    executeSecureChatMessagePayloadTransmissionRoutine();
+                }
+            };
+        }
 
-        function loadMessages() {
-            if (unsubscribeChat) unsubscribeChat();
-            const q = query(collection(db, "secure_messages"), orderBy("timestamp", "asc"));
-            unsubscribeChat = onSnapshot(q, (snapshot) => {
+        // MESSAGES RUNTIME THREAD LOADER REALTIME SUBSCRIPTION METHOD RENDERER
+        function executeLiveConversationMessagesThreadRendererStreamLoad() {
+            if (!activeRoomId) return;
+            
+            if (unsubscribeChat) {
+                unsubscribeChat();
+                unsubscribeChat = null;
+            }
+            
+            const completeSecureMessageDatabaseTableOrderedQueryConstraintsPointer = query(
+                collection(db, "secure_messages"), 
+                orderBy("timestamp", "asc")
+            );
+            
+            unsubscribeChat = onSnapshot(completeSecureMessageDatabaseTableOrderedQueryConstraintsPointer, (completeGlobalMessagesSnapshotDataCollectionVector) => {
+                if (!chatBox) return;
                 chatBox.innerHTML = "";
-                snapshot.forEach((docSnap) => {
-                    const data = docSnap.data();
-                    if (data.roomId === activeRoomId) {
-                        const msgDiv = document.createElement("div"); msgDiv.classList.add("msg", data.sender === currentUser.email.toLowerCase() ? "sent" : "received");
-                        if(data.message) { const textSpan = document.createElement("span"); textSpan.innerText = data.message; msgDiv.appendChild(textSpan); }
-                        if (data.fileUrl) {
-                            if (data.fileType === "image") { const img = document.createElement("img"); img.src = data.fileUrl; msgDiv.appendChild(img); }
-                            else { const vid = document.createElement("video"); vid.src = data.fileUrl; vid.controls = true; msgDiv.appendChild(vid); }
+                
+                let messagesCounterIndex = 0;
+                const authenticatedCleanSessionUserEmailString = String(currentUser.email).toLowerCase().trim();
+                
+                completeGlobalMessagesSnapshotDataCollectionVector.forEach((messageDocumentRecordSnapshotNode) => {
+                    const messageDataPayloadMap = messageDocumentRecordSnapshotNode.data();
+                    
+                    if (messageDataPayloadMap.roomId === activeRoomId) {
+                        messagesCounterIndex++;
+                        
+                        const singleBubbleMessageContainerDivElementNode = document.createElement("div");
+                        singleBubbleMessageContainerDivElementNode.classList.add("msg");
+                        
+                        if (messageDataPayloadMap.sender === authenticatedCleanSessionUserEmailString) {
+                            singleBubbleMessageContainerDivElementNode.classList.add("sent");
+                        } else {
+                            singleBubbleMessageContainerDivElementNode.classList.add("received");
                         }
-                        const metaRow = document.createElement("div"); metaRow.classList.add("msg-meta-row");
-                        const timeSpan = document.createElement("span"); timeSpan.classList.add("time");
-                        timeSpan.innerText = data.timestamp ? data.timestamp.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "...";
-                        metaRow.appendChild(timeSpan);
-                        if (isAdmin(currentUser.email)) {
-                            const delBtn = document.createElement("button"); delBtn.classList.add("admin-delete-msg-btn"); delBtn.innerText = "✕ Purge";
-                            delBtn.onclick = async () => { await deleteDoc(doc(db, "secure_messages", docSnap.id)); }; metaRow.appendChild(delBtn);
+                        
+                        // Construct string payload display segments loops
+                        if (messageDataPayloadMap.message) {
+                            const textDataTextSpanNode = document.createElement("span");
+                            textDataTextSpanNode.innerText = messageDataPayloadMap.message;
+                            singleBubbleMessageContainerDivElementNode.appendChild(textDataTextSpanNode);
                         }
-                        msgDiv.appendChild(metaRow); chatBox.appendChild(msgDiv);
+                        
+                        // Render binary media files attachments wrappers structures components
+                        if (messageDataPayloadMap.fileUrl) {
+                            if (messageDataPayloadMap.fileType === "image") {
+                                const embeddedImageAssetNode = document.createElement("img");
+                                embeddedImageAssetNode.src = messageDataPayloadMap.fileUrl;
+                                embeddedImageAssetNode.alt = "Secure Payload Asset Matrix Attachment Image Frame Component Input Source Block";
+                                singleBubbleMessageContainerDivElementNode.appendChild(embeddedImageAssetNode);
+                            } else if (messageDataPayloadMap.fileType === "video") {
+                                const embeddedVideoPlaybackAssetNode = document.createElement("video");
+                                embeddedVideoPlaybackAssetNode.src = messageDataPayloadMap.fileUrl;
+                                embeddedVideoPlaybackAssetNode.controls = true;
+                                singleBubbleMessageContainerDivElementNode.appendChild(embeddedVideoPlaybackAssetNode);
+                            }
+                        }
+                        
+                        // Structure systemic informational meta rows layouts blocks lines
+                        const messageMetadataLayoutRowDivNode = document.createElement("div");
+                        messageMetadataLayoutRowDivNode.classList.add("msg-meta-row");
+                        
+                        const timeDisplayStampTextSpanNode = document.createElement("span");
+                        timeDisplayStampTextSpanNode.classList.add("time");
+                        
+                        if (messageDataPayloadMap.timestamp) {
+                            try {
+                                timeDisplayStampTextSpanNode.innerText = messageDataPayloadMap.timestamp.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                            } catch (timestampConversionExceptionError) {
+                                timeDisplayStampTextSpanNode.innerText = "...";
+                            }
+                        } else {
+                            timeDisplayStampTextSpanNode.innerText = "...";
+                        }
+                        
+                        messageMetadataLayoutRowDivNode.appendChild(timeDisplayStampTextSpanNode);
+                        
+                        // Append administrative deletion operations targets buttons overrides vectors interfaces if valid
+                        if (verifyUserAdministrativeClearancePrivilege(authenticatedCleanSessionUserEmailString)) {
+                            const administrativePurgeControlActionTriggerButtonElementNode = document.createElement("button");
+                            administrativePurgeControlActionTriggerButtonElementNode.classList.add("admin-delete-msg-btn");
+                            administrativePurgeControlActionTriggerButtonElementNode.innerText = "✕ Purge Content Packet";
+                            
+                            administrativePurgeControlActionTriggerButtonElementNode.onclick = async function() {
+                                try {
+                                    await deleteDoc(doc(db, "secure_messages", messageDocumentRecordSnapshotNode.id));
+                                } catch (administrativePurgeExecutionDatabaseWriteFaultError) {
+                                    console.error("Purge operations execution error fault path tracking matrix logic.");
+                                }
+                            };
+                            
+                            messageMetadataLayoutRowDivNode.appendChild(administrativePurgeControlActionTriggerButtonElementNode);
+                        }
+                        
+                        singleBubbleMessageContainerDivElementNode.appendChild(messageMetadataLayoutRowDivNode);
+                        chatBox.appendChild(singleBubbleMessageContainerDivElementNode);
                     }
                 });
+                
+                // Keep the structural viewports auto-scrolled to the lower operational message base layout margins
                 chatBox.scrollTop = chatBox.scrollHeight;
             });
         }
 
-        document.getElementById("top-nav-qr-code-btn").onclick = () => {
-            const container = document.getElementById("profile-qr-target-zone"); container.innerHTML = "";
-            new QRCode(container, { text: currentUser.email.toLowerCase(), width: 160, height: 160 });
-            document.getElementById("qr-generator-modal").classList.remove("hidden");
-        };
+        // HANDSHAKE INTEGRATION PROFILE LOCAL QR MATRIX BLUEPRINT GENERATOR HOOK
+        if (document.getElementById("top-nav-qr-code-btn")) {
+            document.getElementById("top-nav-qr-code-btn").onclick = function() {
+                const targetQrCodeRenderingOutputZoneContainerElement = document.getElementById("profile-qr-target-zone");
+                if (!targetQrCodeRenderingOutputZoneContainerElement || !currentUser) return;
+                
+                targetQrCodeRenderingOutputZoneContainerElement.innerHTML = "";
+                const cleanUserCredentialProfileEmailAddressStringPayload = String(currentUser.email).toLowerCase().trim();
+                
+                try {
+                    new QRCode(targetQrCodeRenderingOutputZoneContainerElement, {
+                        text: cleanUserCredentialProfileEmailAddressStringPayload,
+                        width: 180,
+                        height: 180,
+                        colorDark: "#111b21",
+                        colorLight: "#ffffff",
+                        correctLevel: QRCode.CorrectLevel.H
+                    });
+                    
+                    const openTargetModalGeneratorWidgetElementWrapperRef = document.getElementById("qr-generator-modal");
+                    if (openTargetModalGeneratorWidgetElementWrapperRef) {
+                        openTargetModalGeneratorWidgetElementWrapperRef.classList.remove("hidden");
+                    }
+                } catch (qrGenerationRuntimeFailureError) {
+                    alert("Handshake parameter code matrix construction compile engine fault failure: " + qrGenerationRuntimeFailureError.message);
+                }
+            };
+        }
 
-        document.getElementById("top-nav-scan-lens-btn").onclick = () => {
-            document.getElementById("qr-scanner-modal").classList.remove("hidden");
-            html5QrcodeScannerPointer = new Html5Qrcode("native-scanner-camera-viewport");
-            html5QrcodeScannerPointer.start({ facingMode: "environment" }, { fps: 10, qrbox: 220 }, (decodedText) => {
-                const prospectiveFriendEmail = decodedText.trim().toLowerCase();
-                html5QrcodeScannerPointer.stop().then(async () => {
-                    document.getElementById("qr-scanner-modal").classList.add("hidden");
-                    const lexArray = [currentUser.email.toLowerCase(), prospectiveFriendEmail].sort();
-                    await setDoc(doc(db, "friends_registry", `${lexArray[0]}_to_${lexArray[1]}`.replace(/\./g, "_")), { pair: lexArray, timestamp: serverTimestamp() });
-                });
-            }, () => {});
-        };
+        // NATIVE DEVICE OPTICAL CAMERA LENS QR MATRIX SCANNER CORE HOOK CONTEXT
+        if (document.getElementById("top-nav-scan-lens-btn")) {
+            document.getElementById("top-nav-scan-lens-btn").onclick = function() {
+                const targetScannerCameraViewportContainerElement = document.getElementById("native-scanner-camera-viewport");
+                const targetScannerModalWrapperOverlayContainerElement = document.getElementById("qr-scanner-modal");
+                
+                if (!targetScannerCameraViewportContainerElement || !targetScannerModalWrapperOverlayContainerElement) return;
+                
+                targetScannerModalWrapperOverlayContainerElement.classList.remove("hidden");
+                
+                try {
+                    html5QrcodeScannerPointer = new Html5Qrcode("native-scanner-camera-viewport");
+                    
+                    const scanExecutionSuccessCallbackRoutine = function(successfullyDecodedQrMatrixTextPayloadStringValue) {
+                        if (!successfullyDecodedQrMatrixTextPayloadStringValue) return;
+                        
+                        const normalizedProspectiveTargetPeerEmailString = successfullyDecodedQrMatrixTextPayloadStringValue.trim().toLowerCase();
+                        
+                        if (html5QrcodeScannerPointer) {
+                            html5QrcodeScannerPointer.stop().then(async () => {
+                                targetScannerModalWrapperOverlayContainerElement.classList.add("hidden");
+                                
+                                if (normalizedProspectiveTargetPeerEmailString === String(currentUser.email).toLowerCase().trim()) {
+                                    alert("Optical Core Scan Aborted: Self-referential profile network endpoint links loop tracking bypass blocked.");
+                                    return;
+                                }
+                                
+                                try {
+                                    const uniqueCompositeFriendRequestDocumentIdKeyString = `${String(currentUser.email).toLowerCase().replace(/\./g, "_")}_to_${normalizedProspectiveTargetPeerEmailString.replace(/\./g, "_")}`;
+                                    await setDoc(doc(db, "friend_requests", uniqueCompositeFriendRequestDocumentIdKeyString), {
+                                        sender: String(currentUser.email).toLowerCase(),
+                                        receiver: normalizedProspectiveTargetPeerEmailString,
+                                        status: "requested",
+                                        timestamp: serverTimestamp()
+                                    }, { merge: true });
+                                    
+                                    alert(`Optical Lens Handshake Captured! Request sent to address [${normalizedProspectiveTargetPeerEmailString}]. Complete alignment acknowledgment within peer ledger lists maps.`);
+                                } catch (err) {
+                                    alert("Optical loop data entry documentation record failure.");
+                                }
+                            }).catch(stopStreamProcessExceptionError => {
+                                console.error("Camera interface stream power termination fault exception tracing.");
+                                targetScannerModalWrapperOverlayContainerElement.classList.add("hidden");
+                            });
+                        }
+                    };
+                    
+                    const scanExecutionFailureInternalVerboseLogCallbackRoutine = function(detailedScanVerboseLogErrorMessageString) {
+                        // Standard dynamic matrix reading iteration log track catches bypass
+                    };
+                    
+                    html5QrcodeScannerPointer.start(
+                        { facingMode: "environment" },
+                        { fps: 12, qrbox: { width: 230, height: 230 } },
+                        scanExecutionSuccessCallbackRoutine,
+                        scanExecutionFailureInternalVerboseLogCallbackRoutine
+                    ).catch(cameraHardwareInterfaceInitializationError => {
+                        alert("Native optical camera lens hardware frame access integration crash error: " + cameraHardwareInterfaceInitializationError.message);
+                        targetScannerModalWrapperOverlayContainerElement.classList.add("hidden");
+                    });
+                    
+                } catch (instantiationFatalScannerCoreExceptionError) {
+                    alert("Optical capture lens framework instantiation module trace exception fault: " + instantiationFatalScannerCoreExceptionError.message);
+                    targetScannerModalWrapperOverlayContainerElement.classList.add("hidden");
+                }
+            };
+        }
 
-        document.getElementById("stop-qr-lens-scanner-trigger-btn").onclick = () => {
-            if (html5QrcodeScannerPointer) { html5QrcodeScannerPointer.stop().then(() => { document.getElementById("qr-scanner-modal").classList.add("hidden"); }).catch(() => { document.getElementById("qr-scanner-modal").classList.add("hidden"); }); }
-            else { document.getElementById("qr-scanner-modal").classList.add("hidden"); }
-        };
+        if (document.getElementById("stop-qr-lens-scanner-trigger-btn")) {
+            document.getElementById("stop-qr-lens-scanner-trigger-btn").onclick = function() {
+                const targetScannerModalWrapperOverlayElement = document.getElementById("qr-scanner-modal");
+                
+                if (html5QrcodeScannerPointer) {
+                    html5QrcodeScannerPointer.stop().then(() => {
+                        html5QrcodeScannerPointer = null;
+                        if (targetScannerModalWrapperOverlayElement) targetScannerModalWrapperOverlayElement.classList.add("hidden");
+                    }).catch(err => {
+                        html5QrcodeScannerPointer = null;
+                        if (targetScannerModalWrapperOverlayElement) targetScannerModalWrapperOverlayElement.classList.add("hidden");
+                    });
+                } else {
+                    if (targetScannerModalWrapperOverlayElement) targetScannerModalWrapperOverlayElement.classList.add("hidden");
+                }
+            };
+        }
 
-        function runAdminEngineTracker() {
-            onSnapshot(collection(db, "presence"), (snapshot) => {
-                const adminUserRoster = document.getElementById("admin-user-roster"); adminUserRoster.innerHTML = "";
-                snapshot.forEach((docSnap) => {
-                    const data = docSnap.data(); const item = document.createElement("div"); item.style.background = "#2a3942"; item.style.padding = "4px"; item.style.borderRadius = "4px";
-                    item.innerHTML = `<b>${data.name}</b><br>${data.email}`; item.onclick = () => { document.getElementById("admin-bank-target-manual-input").value = data.email; };
-                    adminUserRoster.appendChild(item);
+        // ADMINISTRATIVE SOVEREIGN BANKING CONTROL PANEL LIFECYCLE INITIALIZER LOGIC
+        function initializeServerAdministrativeControlCoreEngineTrackers() {
+            onSnapshot(collection(db, "presence"), (globalUserPresenceMatrixDataCollectionSnapshotVector) => {
+                const administrativeTerminalTargetUserRosterContainerElement = document.getElementById("admin-user-roster");
+                if (!administrativeTerminalTargetUserRosterContainerElement) return;
+                
+                administrativeTerminalTargetUserRosterContainerElement.innerHTML = "";
+                
+                globalUserPresenceMatrixDataCollectionSnapshotVector.forEach((userPresenceDocumentSnapshotNode) => {
+                    const presenceProfileDataMap = userPresenceDocumentSnapshotNode.data();
+                    
+                    const administrativeUserRowItemUiNode = document.createElement("div");
+                    administrativeUserRowItemUiNode.style.background = "#2a3942";
+                    administrativeUserRowItemUiNode.style.padding = "8px";
+                    administrativeUserRowItemUiNode.style.borderRadius = "6px";
+                    administrativeUserRowItemUiNode.style.cursor = "pointer";
+                    administrativeUserRowItemUiNode.style.border = "1px solid #3b4a54";
+                    administrativeUserRowItemUiNode.style.lineBreak = "anywhere";
+                    
+                    const tokenFormattingOutputLabelValueTextString = presenceProfileDataMap.tokens === "inf" ? "♾️ Infinite Sovereign" : `${presenceProfileDataMap.tokens} Cloud Tokens`;
+                    
+                    administrativeUserRowItemUiNode.innerHTML = `
+                        <div style="font-weight: bold; color: #00a884; font-size: 11.5px;">👤 Node Username Name: ${presenceProfileDataMap.name}</div>
+                        <div style="color: #e9edef; font-size: 11px;">✉️ Address Node Route: ${presenceProfileDataMap.email}</div>
+                        <div style="color: #ffb300; font-size: 10.5px; font-weight: bold; margin-top: 2px;">💰 Core Bank Balance: ${tokenFormattingOutputLabelValueTextString}</div>
+                        <button style="background: #ea0038; color: white; border: none; padding: 4px 8px; border-radius: 4px; font-size: 10px; font-weight: bold; margin-top: 6px; cursor: pointer;" id="admin-action-ban-trigger-btn-${userPresenceDocumentSnapshotNode.id}">Exile & Ban Node</button>
+                    `;
+                    
+                    administrativeTerminalTargetUserRosterContainerElement.appendChild(administrativeUserRowItemUiNode);
+                    
+                    administrativeUserRowItemUiNode.onclick = function(eventBubbleInterceptorTargetPayloadObject) {
+                        if (eventBubbleInterceptorTargetPayloadObject.target.tagName.toLowerCase() === 'button') {
+                            return; // Enforce execution isolation boundaries block to preserve sub-button tracking loops
+                        }
+                        
+                        const inputTargetBankManualOverrideFieldRefElement = document.getElementById("admin-bank-target-manual-input");
+                        if (inputTargetBankManualOverrideFieldRefElement) {
+                            inputTargetBankManualOverrideFieldRefElement.value = presenceProfileDataMap.email;
+                        }
+                    };
+                    
+                    const executionBanTargetActionTriggerButtonRefElement = document.getElementById(`admin-action-ban-trigger-btn-${userPresenceDocumentSnapshotNode.id}`);
+                    if (executionBanTargetActionTriggerButtonRefElement) {
+                        executionBanTargetActionTriggerButtonRefElement.onclick = async function(eventObjectBubbleCloserTargetPayloadPointer) {
+                            eventObjectBubbleCloserTargetPayloadPointer.stopPropagation();
+                            const runtimeDoubleCheckBanActionConfirmationUserPromptFlagValue = confirm(`Confirm structural quarantine command application parameters? Exiling entity address will completely destroy active channel linkages metrics tracking fields values for user: [${presenceProfileDataMap.email}]`);
+                            
+                            if (runtimeDoubleCheckBanActionConfirmationUserPromptFlagValue) {
+                                try {
+                                    const banRegistryQuarantineDocumentKeyPathIdString = String(presenceProfileDataMap.email).toLowerCase().trim();
+                                    await setDoc(doc(db, "bans", banRegistryQuarantineDocumentKeyPathIdString), {
+                                        bannedBy: String(currentUser.email).toLowerCase(),
+                                        quarantineTimestamp: serverTimestamp()
+                                    }, { merge: true });
+                                    
+                                    alert(`Target terminal identity node address [${presenceProfileDataMap.email}] successfully isolated and logged on blacklists registry. Clearance profiles suspended.`);
+                                } catch (banDocumentInjectionWriteErrorVectorFault) {
+                                    alert("Administrative override write transaction structural lock path failure error: " + banDocumentInjectionWriteErrorVectorFault.message);
+                                }
+                            }
+                        };
+                    }
                 });
             });
-            document.getElementById("admin-execute-bank-btn").onclick = async () => {
-                let target = document.getElementById("admin-bank-target-manual-input").value.trim().toLowerCase();
-                const valueParam = document.getElementById("admin-token-amount-input").value.trim().toLowerCase();
-                if(!target || !valueParam) return;
-                await setDoc(doc(db, "presence", target.replace(/\./g, "_")), { tokens: valueParam === "inf" ? "inf" : parseInt(valueParam) }, { merge: true });
-                alert("Override successful.");
-            };
+            
+            const processExecutionLedgerCreditBankModificationOverrideButtonElement = document.getElementById("admin-execute-bank-btn");
+            if (processExecutionLedgerCreditBankModificationOverrideButtonElement) {
+                processExecutionLedgerCreditBankModificationOverrideButtonElement.onclick = async function() {
+                    const targetedTargetAccountManualFieldInputEmailString = document.getElementById("admin-bank-target-manual-input").value.trim().toLowerCase();
+                    const quantitativeValueInputFieldStringPayloadParam = document.getElementById("admin-token-amount-input").value.trim().toLowerCase();
+                    
+                    if (!targetedTargetAccountManualFieldInputEmailString || !quantitativeValueInputFieldStringPayloadParam) {
+                        alert("Control Block Intercept: Target entity routing parameter elements field nodes targets cannot be blank.");
+                        return;
+                    }
+                    
+                    const databaseSyncTargetRouteKeyIdString = targetedTargetAccountManualFieldInputEmailString.replace(/\./g, "_");
+                    const userProfileTargetDocumentReferencePointer = doc(db, "presence", databaseSyncTargetRouteKeyIdString);
+                    
+                    let resolvedTokenDatabaseFormattingValuePayloadType = null;
+                    if (quantitativeValueInputFieldStringPayloadParam === "inf") {
+                        resolvedTokenDatabaseFormattingValuePayloadType = "inf";
+                    } else {
+                        resolvedTokenDatabaseFormattingValuePayloadType = parseInt(quantitativeValueInputFieldStringPayloadParam);
+                        if (isNaN(resolvedTokenDatabaseFormattingValuePayloadType)) {
+                            alert("Control Block Intercept: Injected ledger modifications tracking values must resolve as a numeric integer parameter cluster sequence or specify boundlessness.");
+                            return;
+                        }
+                    }
+                    
+                    try {
+                        await setDoc(userProfileTargetDocumentReferencePointer, { tokens: resolvedTokenDatabaseFormattingValuePayloadType }, { merge: true });
+                        alert(`Ledger allocation overwrite completed successfully down pipeline routing paths. Destination entity account balance [${targetedTargetAccountManualFieldInputEmailString}] successfully shifted to standard index parameter notation: [${resolvedTokenDatabaseFormattingValuePayloadType}].`);
+                        
+                        document.getElementById("admin-bank-target-manual-input").value = "";
+                        document.getElementById("admin-token-amount-input").value = "";
+                    } catch (administrativeTokenBalanceOverrideFirestoreDatabaseWriteExceptionError) {
+                        alert("Administrative banking transaction ledger allocation write failure: " + administrativeTokenBalanceOverrideFirestoreDatabaseWriteExceptionError.message);
+                    }
+                };
+            }
         }
     </script>
 </body>
